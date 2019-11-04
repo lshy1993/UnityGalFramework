@@ -71,7 +71,7 @@ namespace Assets.Script.Framework.Effect
         /// </summary>
         public void Finish()
         {
-            Debug.Log("finished");
+            //Debug.Log("finished");
             DOTween.Kill(GetComponent<Text>());
             mLabel.text = mFullText;
             onFinished.Invoke();

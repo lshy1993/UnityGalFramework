@@ -43,7 +43,7 @@ namespace Assets.Script.Framework
             dialogLabel = mainContainer.transform.Find("Dialog_Panel/Content_Text").GetComponent<Text>();
             nameLabel = mainContainer.transform.Find("Dialog_Panel/Name_Text").GetComponent<Text>();
 
-            nextIcon = mainContainer.transform.Find("Dialog_Panel/NextIcon_Image").gameObject;
+            nextIcon = dialogLabel.transform.Find("NextIcon_Image").gameObject;
 
             te = dialogLabel.transform.GetComponent<TypeWriter>();
             te.enabled = false;
@@ -190,8 +190,8 @@ namespace Assets.Script.Framework
             float fullSize = label.fontSize;
             float x = 0f, y = fullSize;
             RectTransform transform = label.GetComponent<RectTransform>();
-            float offx = transform.offsetMin.x;
-            float offy = transform.offsetMax.y;
+            float offx = 0;//trasform.offsetMin.x;
+            float offy = 0;// transform.offsetMax.y;
             Debug.Log(offx + " " + offy);
 
             for (int i = 0; i < text.Length; i++)
@@ -205,7 +205,9 @@ namespace Assets.Script.Framework
                 }
                 else
                 {
-                    x += fullSize;
+                    CharacterInfo charInfo;
+                    label.font.GetCharacterInfo(ch, out charInfo, label.fontSize);
+                    x += charInfo.advance;
                 }
             }
 
