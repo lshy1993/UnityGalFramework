@@ -123,8 +123,8 @@ namespace Assets.Script.Framework
             {
                 GameObject go = Resources.Load("Prefab/Character") as GameObject;
                 go = Instantiate(go);
-                go.transform.SetParent(fgPanel.transform);
-                go.transform.localScale = Vector3.one;
+                go.transform.SetParent(fgPanel.transform, false);
+                //go.transform.localScale = Vector3.one;
                 go.transform.name = "sprite" + depth;
                 ui = go.GetComponent<Image>();
             }
@@ -148,7 +148,7 @@ namespace Assets.Script.Framework
                 Image originSprite = GetSpriteByDepth(depth);
                 //复制一个变成Trans
                 GameObject go = Instantiate(originSprite.gameObject) as GameObject;
-                go.transform.SetParent(originSprite.transform.parent);
+                go.transform.SetParent(originSprite.transform.parent, false);
                 go.transform.localPosition = originSprite.transform.localPosition;
                 go.transform.localScale = originSprite.transform.localScale;
                 go.transform.name = "trans" + depth;
@@ -171,7 +171,7 @@ namespace Assets.Script.Framework
             else
             {
                 ui = new GameObject();
-                ui.transform.SetParent(fgPanel.transform);
+                ui.transform.SetParent(fgPanel.transform, false);
                 ui.transform.name = "Live2d_" + depth;
                 Live2dModel lt = ui.AddComponent<Live2dModel>();
 

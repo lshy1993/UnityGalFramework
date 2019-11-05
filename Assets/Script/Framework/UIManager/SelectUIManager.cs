@@ -17,24 +17,34 @@ namespace Assets.Script.Framework.UI
     /// </summary>
     public class SelectUIManager : MonoBehaviour
     {
-        //网络模块
-        //public HttpManager hm;
-        //选项与倒计时
-        public GameObject countCon, selectCon;
+        /// <summary>
+        /// 网络模块
+        /// </summary>
+        public NetworkManager netManager;
 
         /// <summary>
-        /// 选项块
+        /// 倒计时Panel
+        /// </summary>
+        public GameObject countCon;
+
+        /// <summary>
+        /// 选项Panel
         /// </summary>
         public GameObject listCon;
 
-        public GameObject hintBtn;
         /// <summary>
-        /// 网络统计块
+        /// 提示显示按钮
         /// </summary>
-        public GameObject hintCon;
+        //public GameObject hintBtn;
+
+        /// <summary>
+        /// 网络统计显示
+        /// </summary>
+        //public GameObject hintCon;
 
         //public UIProgressBar countBar;
 
+        
         private SelectNode selectNode;
 
         /// <summary>
@@ -80,8 +90,8 @@ namespace Assets.Script.Framework.UI
                 currentSelect.select.Add(kv.Key);
                 currentSelect.entrance.Add(kv.Value);
             }
-            hintBtn.SetActive(false);
-            //this.selections = dic;
+            //hintBtn.SetActive(false);
+            this.selections = dic;
         }
 
         /// <summary>
@@ -93,7 +103,7 @@ namespace Assets.Script.Framework.UI
             //Selection se =  DataManager.GetInstance().staticData.selections[selectid];
             //this.currentSelect = se;
             //SetCountDown((float)se.cd, se.cdexit);
-            hintBtn.SetActive(true);
+            //hintBtn.SetActive(true);
         }
 
         private void Update()
@@ -111,9 +121,10 @@ namespace Assets.Script.Framework.UI
                     //计时器关闭且重置
                     currentTime = 0f;
                     flag = false;
-                    //选择默认出口
-                    selectCon.SetActive(false);
+                    //关闭界面
+                    listCon.SetActive(false);
                     countCon.SetActive(false);
+                    //选择默认出口
                     selectNode.NodeExit(cdexit);
                 }
             }
@@ -124,7 +135,7 @@ namespace Assets.Script.Framework.UI
         /// </summary>
         public void Show()
         {
-            hintCon.SetActive(false);
+            //hintCon.SetActive(false);
             countCon.SetActive(false);
             StartCoroutine(ShowBack());
         }
@@ -143,21 +154,16 @@ namespace Assets.Script.Framework.UI
             {
                 Destroy(listCon.transform.GetChild(i).gameObject);
             }
-            //listCon.transform.DestroyChildren();
-            for (int i = 0; i < hintCon.transform.childCount; i++)
-            {
-                Destroy(hintCon.transform.GetChild(i).gameObject);
-            }
-            //hintCon.transform.DestroyChildren();
             for (int i = 1; i <= n; i++)
             {
                 //生成选项按钮
-                //GameObject go = Resources.Load("Prefab/TextSelection_Button") as GameObject;
-                //go = NGUITools.AddChild(listCon, go);
-                //go.transform.localPosition = new Vector3(0, 400 - (i * d + i * 80));
-                //go.transform.Find("Label").GetComponent<Text>().text = currentSelect.select[i - 1];
-                //go.GetComponent<SelectButton>().SetUIManager(this);
-                //go.GetComponent<SelectButton>().SetID(i);
+                GameObject go = Resources.Load("Prefab/TextSelection_Button") as GameObject;
+                go = Instantiate(go);
+                go.transform.SetParent(listCon.transform, false);
+                go.transform.localPosition = new Vector3(0, 400 - (i * d + i * 80));
+                go.transform.Find("Text").GetComponent<Text>().text = currentSelect.select[i - 1];
+                go.GetComponent<SelectButton>().SetUIManager(this);
+                go.GetComponent<SelectButton>().SetID(i);
                 //百分比统计
                 //go = Resources.Load("Prefab/SelectionRate_Label") as GameObject;
                 //go = NGUITools.AddChild(hintCon, go);
@@ -192,8 +198,7 @@ namespace Assets.Script.Framework.UI
             {
                 Destroy(listCon.transform.GetChild(j).gameObject);
             }
-            //listCon.transform.DestroyChildren();
-            selectCon.SetActive(false);
+            listCon.SetActive(false);
             countCon.SetActive(false);
             //写入数据
             DataManager.GetInstance().gameData.selectionSwitch.Add(currentSelect.select[i - 1]);
@@ -219,8 +224,7 @@ namespace Assets.Script.Framework.UI
 
         //private IEnumerator HttpGetSelect(string id)
         //{
-        //    //string url = "http://localhost:3000/lt/select/" + id;
-        //    string url = "http://api.liantui.xyz/lt/select/" + id;
+        //    string url = "http://localhost:3000/lt/select/" + id;
 
         //    UnityWebRequest request = UnityWebRequest.Get(url);
         //    yield return request.SendWebRequest();
@@ -237,17 +241,17 @@ namespace Assets.Script.Framework.UI
         //        {
         //            double p = (double)pp;
         //            Transform go = hintCon.transform.GetChild(i);
-        //            go.GetComponent<UILabel>().text = p.ToString("p");
+        //            go.GetComponent<Text>().text = p.ToString("p");
         //            i++;
         //        }
         //    }
         //    hintCon.SetActive(true);
         //}
 
-        //显示背景动画
+        //显示选项Panel背景动画
         private IEnumerator ShowBack()
         {
-            selectCon.SetActive(true);
+            listCon.SetActive(true);
             //动画循环
             float t = 0;
             int y = 0;
@@ -255,8 +259,8 @@ namespace Assets.Script.Framework.UI
             {
                 t = Mathf.MoveTowards(t, 1, 1 / 0.2f * Time.deltaTime);
                 y = (int)(t * 720);
-                selectCon.GetComponent<Image>().color = new Color(0, 0, 0, t);
-                //selectCon.GetComponent<Image>().height = y;
+                listCon.GetComponent<CanvasGroup>().alpha = t;
+                //listCon.GetComponent<Image>().height = y;
                 yield return null;
             }
 

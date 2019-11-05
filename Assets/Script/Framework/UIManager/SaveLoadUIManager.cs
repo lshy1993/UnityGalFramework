@@ -35,9 +35,9 @@ namespace Assets.Script.Framework.UI
             {
                 //GameObject go = Resources.Load("Prefab/SaveBox") as GameObject;
                 //go = Instantiate(go);
+                //go.transform.SetParent(saveTable.transform,false);
                 //go.name = "SaveBox" + i;
                 GameObject go = transform.Find("SaveSlot_Panel/SaveBox" + i).gameObject;
-                go.transform.SetParent(saveTable.transform);
                 var slbtn = go.GetComponent<SaveLoadButton>();
                 slbtn.id = i;
                 slbtn.uiManager = this;

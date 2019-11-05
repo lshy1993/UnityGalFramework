@@ -94,6 +94,7 @@ namespace Assets.Script.Framework
         private bool startNewGame = false;
 
         public string version = "UnityGalgameFrame v0.1";
+        public string entryNode = "demo0_0";
 
         void Awake()
         {
@@ -166,7 +167,7 @@ namespace Assets.Script.Framework
         {
             //重置gameVar
             dm.InitGame();
-            node = nodeFactory.FindTextScript("demo_jump");
+            node = nodeFactory.FindTextScript(entryNode);
             //清空原先的文字记录
             dm.ClearHistory();
         }
