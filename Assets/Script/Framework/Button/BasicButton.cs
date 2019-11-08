@@ -19,7 +19,10 @@ namespace Assets.Script.Framework.UI
         public UnityEvent onClick;
  
         [SerializeField]
-        public UnityEvent onHover;
+        public UnityEvent onHoverEnter;
+
+        [SerializeField]
+        public UnityEvent onHoverLeave;
 
         /// <summary>
         /// 默认悬停音效
@@ -99,7 +102,8 @@ namespace Assets.Script.Framework.UI
         /// </summary>
         protected virtual void Hover(bool ishover)
         {
-            onHover.Invoke();
+            if (ishover) onHoverEnter.Invoke();
+            else onHoverLeave.Invoke();
         }
 
         /// <summary>

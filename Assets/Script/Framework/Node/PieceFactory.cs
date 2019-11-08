@@ -118,6 +118,15 @@ namespace Assets.Script.Framework.Node
             return new EffectPiece(id++, effects);
         }
 
+        public EffectPiece SetLive2dSprite(int depth, string modelName, int x = 0,int y = 0)
+        {
+            Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
+            effects.Enqueue(NewEffectBuilder.SetLive2dSpriteByDepth(depth, modelName));
+            //effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(depth, 1));
+            effects.Enqueue(NewEffectBuilder.SetPostionByDepth(depth, new Vector3(x, y)));
+            return new EffectPiece(id++, effects);
+        }
+
 
         #region EffectPiece部分
         /// <summary>

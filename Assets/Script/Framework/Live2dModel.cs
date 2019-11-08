@@ -4,6 +4,7 @@ using System.IO;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Rendering;
 using Live2D.Cubism.Framework.Json;
+using Live2D.Cubism.Framework.Expression;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +16,7 @@ namespace Assets.Script.Framework
         private CubismModel model;
         private Camera live2DCamera;
         public RawImage image;
+        public int depth;
 
         private void Start()
         {
@@ -23,28 +25,31 @@ namespace Assets.Script.Framework
 
         public void LoadModel(string modelName)
         {
-            string fullPath = Application.dataPath + "/Resources/Live2dmodel/" + modelName + ".model3.json";
-            CubismModel3Json ModelJson = CubismModel3Json.LoadAtPath(fullPath, LoadAsset);
-            model = ModelJson.ToModel();
-
-            //string fullPath = "Prefab/" + modelName + ".prefab";
-            //Debug.Log(fullPath);
-            //GameObject go = Resources.Load(fullPath) as GameObject;
-            ////model =  as CubismModel;
-            //model = Instantiate(model).GetComponent<CubismModel>();
-
-            GameObject go = GameObject.Find("Live2dCamera");
-            live2DCamera = go.GetComponent<Camera>();
-            RuntimeAnimatorController rc = Resources.Load("Live2dmodel/ming/motions/test.controller") as RuntimeAnimatorController;
-            
-            Debug.Log(Resources.Load("Live2dmodel/mingmeng_winter.controller"));
-            model.GetComponent<Animator>().runtimeAnimatorController = rc;
-            model.transform.SetParent(go.transform);
-            model.transform.localScale = new Vector3(1, 1, 1);
-            model.transform.localPosition = new Vector3(0, 0, 10f)
-                ;
-            //setCamera();
+            GameObject camera = GameObject.Find("Live2dCamera");
+            live2DCamera = camera.GetComponent<Camera>();
+            model = load(modelName);
             setRenderTexture();
+        }
+
+        public void LoadModelWithCamera(string modelName)
+        {
+            GameObject go = new GameObject();
+            go.transform.SetParent(this.transform);
+            live2DCamera = go.AddComponent<Camera>();
+            model = load(modelName);
+            setCamera();
+            setRenderTexture();
+        }
+
+        CubismModel load(string modelName)
+        {
+            string fullPath = "Live2dmodel/" + modelName;
+            //Debug.Log(fullPath);
+            GameObject md = Resources.Load(fullPath) as GameObject;
+            md = Instantiate(md);
+            md.transform.SetParent(live2DCamera.transform, false);
+            md.transform.localPosition = new Vector3(-0.3f, 0, -10f * depth);
+            return md.GetComponent<CubismModel>();
         }
 
         public static object LoadAsset(Type assetType, string absolutePath)
@@ -68,25 +73,47 @@ namespace Assets.Script.Framework
         }
 
 
-        void setCamera()
+        public void SetAnimation(string aniname)
+        {
+            RuntimeAnimatorController rc = Resources.Load("Live2dmodel/" + aniname) as RuntimeAnimatorController;
+            //Debug.Log(rc);
+            model.GetComponent<Animator>().runtimeAnimatorController = rc;
+        }
+
+        public void SetExpressionList(string listname)
+        {
+            CubismExpressionList el = Resources.Load("Live2dmodel/"+listname) as CubismExpressionList;
+            model.GetComponent<CubismExpressionController>().ExpressionsList = el;
+        }
+
+        /// <summary>
+        /// 挂载live2d相机
+        /// </summary>
+        private void setCamera()
         {
             live2DCamera.orthographic = true;
             var modelBounds = model
                     .GetComponent<CubismRenderController>()
                     .Renderers
                     .GetMeshRendererBounds();
+            Debug.Log(model.CanvasInformation.CanvasHeight);
+            Debug.Log(model.CanvasInformation.CanvasWidth);
+
+            Debug.Log(modelBounds.size);
             live2DCamera.transform.position = new Vector3(0f, 0f, -10f);
-            live2DCamera.orthographicSize = modelBounds.extents.y * 1.1f;
-            //live2DCamera.cullingMask = 0;
-            live2DCamera.nearClipPlane = -1;
+            //live2DCamera.orthographicSize = modelBounds.extents.y * 1.1f;
+            live2DCamera.orthographicSize = 1.2f;
+            live2DCamera.cullingMask = 1 << 8;
+            live2DCamera.nearClipPlane = -10 * depth - 5;
+            live2DCamera.farClipPlane = -10 * depth;
         }
 
         
-        void setRenderTexture()
+        private void setRenderTexture()
         {
             image = gameObject.AddComponent<RawImage>();
-            var w = 2400;// model.CanvasInformation.CanvasWidth;
-            var h = 3200;//model.CanvasInformation.CanvasHeight;
+            var w = model.CanvasInformation.CanvasWidth;// 2400;
+            var h = model.CanvasInformation.CanvasHeight;// 3200;
             var target = new RenderTexture((int)w, (int)h, (int)Screen.dpi, RenderTextureFormat.ARGB32);
             live2DCamera.targetTexture = target;
             image.texture = target;
@@ -94,7 +121,7 @@ namespace Assets.Script.Framework
             image.SetNativeSize();
             image.rectTransform.localScale = Vector3.one;
             image.rectTransform.localPosition = Vector3.zero;
-            //image.rectTransform.sizeDelta = new Vector2(w / 4f, h / 4f);
+            image.rectTransform.sizeDelta = new Vector2(w / 4f, h / 4f);
         }
 
     }

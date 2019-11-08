@@ -36,7 +36,7 @@ namespace Assets.Script.Framework.UI
             while (panel.alpha > minAlpha)
             {
                 panel.alpha = Mathf.MoveTowards(panel.alpha, minAlpha, fadeSpeed * Time.deltaTime);
-
+                //Debug.Log(Time.time + " " + panel.alpha);
                 yield return null;
             }
 
@@ -57,7 +57,7 @@ namespace Assets.Script.Framework.UI
             while (panel.alpha < maxAlpha)
             {
                 panel.alpha = Mathf.MoveTowards(panel.alpha, maxAlpha, fadeSpeed * Time.deltaTime);
-
+                //Debug.Log(Time.time + " " + panel.alpha);
                 yield return null;
             }
             

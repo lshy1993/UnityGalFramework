@@ -95,6 +95,21 @@ namespace Assets.Script.Framework.Effect
             //operate = OperateMode.SetSprite;
         }
 
+        public override string ToString()
+        {
+            string tt = string.Empty;
+            tt += state.ToString();
+            tt += string.Format(
+                "depth:{0},time:{1},target:{2},mode:{3}\n",
+                depth,time,target,operate
+                );
+            tt += string.Format(
+                "direction:{0},invert:{1},v:{2},freq:{3}\n",
+                direction, inverse, v, freq
+                );
+            return tt;
+        }
+
 
     }
 }

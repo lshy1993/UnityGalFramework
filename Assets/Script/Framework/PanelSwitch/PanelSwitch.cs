@@ -134,7 +134,10 @@ namespace Assets.Script.Framework.UI
                 {
                     CanvasGroup up = go.GetComponent<CanvasGroup>();
                     if (up != null) up.alpha = 0;
+                    Debug.Log(string.Format("{0} SetActive({1}),Alpha: {2}",
+                    go.name, isOpne, up.alpha));
                 }
+
                 go.SetActive(isOpne);
             }
         }
