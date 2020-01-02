@@ -15,6 +15,12 @@ namespace Assets.Script.Framework.Node
     /// </summary>
     public class TextPiece : Piece
     {
+        private enum OperateMode
+        {
+            Line,PageLine,ClearPage
+        }
+        private OperateMode operate = 0;
+
         private string name, dialog, avatar, voice;
 
         private GameObject diabox;
@@ -26,21 +32,48 @@ namespace Assets.Script.Framework.Node
 
         public bool finish = false;
 
+        public TextPiece(int id, GameObject diabox) : base(id)
+        {
+            this.diabox = diabox;
+            this.operate = OperateMode.ClearPage;
+        }
+
         /// <summary>
         /// 最基本的文字段
         /// </summary>
         /// <param name="id">piece id</param>
         /// <param name="diabox">对话框元件</param>
-        /// <param name="name">名字</param>
         /// <param name="dialog">对话内容</param>
+        /// <param name="name">名字</param>
         /// <param name="avatar">头像图片名</param>
-        public TextPiece(int id, GameObject diabox, string name = "", string dialog = "", string avatar = "", string voice = "", int model = -1) : base(id)
+        public TextPiece(int id, GameObject diabox, string dialog, string name = "", string avatar = "", string voice = "", int model = -1) : base(id)
         {
             this.diabox = diabox;
-            setVars(name, dialog, avatar, voice);
+            SetVars(name, dialog, avatar, voice);
             SetModel(model);
         }
 
+        public void RunSimpleLogic(DataManager dm, Func<int> simpleLogic)
+        {
+
+        }
+
+        public void RunComplexLogic(DataManager dm, Func<DataManager, int> complexLogic)
+        {
+
+        }
+
+        public void RunAction(Action callback)
+        {
+            //callback();
+        }
+
+        public void RunAction(Action<DataManager> callback)
+        {
+            //callback();
+        }
+
+        #region 废弃旧代码
         /// <summary>
         /// 带复杂逻辑的文字段
         /// </summary>
@@ -50,11 +83,11 @@ namespace Assets.Script.Framework.Node
         /// <param name="dialog">对话内容</param>
         /// <param name="avatar">头像图片名</param>
         /// <param name="simpleLogic">简单逻辑，可以用lambda表示</param>
-        public TextPiece(int id, GameObject diabox, string name, string dialog, string avatar, string voice, Func<int> simpleLogic) : base(id, simpleLogic)
-        {
-            this.diabox = diabox;
-            setVars(name, dialog, avatar, voice);
-        }
+        //public TextPiece(int id, GameObject diabox, string dialog, string name, string voice, string avatar, Func<int> simpleLogic) : base(id, simpleLogic)
+        //{
+        //    this.diabox = diabox;
+        //    SetVars(name, dialog, avatar, voice);
+        //}
 
         /// <summary>
         /// 创建一个拥有复杂逻辑的文字段，可以引用外部变量
@@ -66,22 +99,22 @@ namespace Assets.Script.Framework.Node
         /// <param name="name">名字</param>
         /// <param name="dialog">对话内容</param>
         /// <param name="avatar">头像图片名</param>
-        public TextPiece(int id,GameObject diabox, DataManager manager, Func<DataManager, int> complexLogic, string name = "", string dialog = "", string avatar = "", string voice = "") : base(id, complexLogic, manager)
-        {
-            setVars(name, dialog, avatar, voice);
-        }
-        public TextPiece(int id, GameObject diabox, DataManager manager, Action simpleAction, string name = "", string dialog = "", string avatar = "", string voice = "") :
-            base(id, simpleAction, manager)
-        {
-            setVars(name, dialog, avatar, voice);
-        }
-        public TextPiece(int id, GameObject diabox, DataManager manager, Action<DataManager> complexAction, string name = "", string dialog = "", string avatar = "", string voice = "") :
-            base(id, complexAction, manager)
-        {
-            setVars(name, dialog, avatar, voice);
-        }
+        //public TextPiece(int id,GameObject diabox, DataManager manager, Func<DataManager, int> complexLogic, string name = "", string dialog = "", string avatar = "", string voice = "") : base(id, complexLogic, manager)
+        //{
+        //    SetVars(name, dialog, avatar, voice);
+        //}
+        //public TextPiece(int id, GameObject diabox, DataManager manager, Action simpleAction, string name = "", string dialog = "", string avatar = "", string voice = "") :
+        //    base(id, simpleAction, manager)
+        //{
+        //    SetVars(name, dialog, avatar, voice);
+        //}
+        //public TextPiece(int id, GameObject diabox, DataManager manager, Action<DataManager> complexAction, string name = "", string dialog = "", string avatar = "", string voice = "") :
+        //    base(id, complexAction, manager)
+        //{
+        //    SetVars(name, dialog, avatar, voice);
+        //}
 
-        #region 废弃旧代码
+
         /// <param name="nameLabel">名字标签</param>
         /// <param name="dialogLabel">对话标签</param>
         /// <param name="avatarSprite">头像</param>
@@ -153,7 +186,22 @@ namespace Assets.Script.Framework.Node
                 hm.AddToTable(new BacklogText(name, dialog, voice, avatar));
                 hm.SetCurrentText(name, dialog);
                 //通过UIManager设置文字，并开启打字机
-                uiManager.SetText(this, name, dialog, voice, avatar);
+                Debug.Log(operate);
+                switch (operate)
+                {
+                    case OperateMode.Line:
+                        uiManager.ClearText();
+                        uiManager.SetText(this, name, dialog, voice, avatar);
+                        break;
+                    case OperateMode.PageLine:
+                        uiManager.HideNextIcon();
+                        uiManager.AddText(this, dialog, voice);
+                        break;
+                    case OperateMode.ClearPage:
+                        uiManager.ClearText();
+                        break;
+                }
+                
                 if(l2dmouth == -1)
                 {
                     sm.SetVoice(voice);
@@ -170,13 +218,18 @@ namespace Assets.Script.Framework.Node
 
         }
 
-        public void Clear()
+        private void Clear()
         {
             MessageUIManager uiManager = diabox.GetComponent<MessageUIManager>();
             uiManager.ClearText();
         }
 
-        private void setVars(string name, string dialog, string avatar, string voice)
+        public void SetPageLine()
+        {
+            operate = OperateMode.PageLine;
+        }
+
+        private void SetVars(string name, string dialog, string avatar, string voice)
         {
             this.name = name;
             this.dialog = dialog;

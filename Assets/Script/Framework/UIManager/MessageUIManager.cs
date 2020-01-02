@@ -19,11 +19,12 @@ namespace Assets.Script.Framework
     {
         //[HideInInspector]
         public GameObject mainContainer, clickContainer;
+        public GameObject dialogPanel, namePanel, avatarPanel;
         private Text dialogLabel;
         private Text nameLabel;
         private TypeWriter te;
 
-        private GameObject nameBox, nextIcon;
+        private GameObject nextIcon;
         private Toggle toggleAuto;
         private Image avatarSprite;
 
@@ -46,9 +47,8 @@ namespace Assets.Script.Framework
 
         void Awake()
         {
-            dialogLabel = mainContainer.transform.Find("Dialog_Panel/Content_Text").GetComponent<Text>();
-            nameBox = mainContainer.transform.Find("Dialog_Panel/Name_Image").gameObject;
-            nameLabel = nameBox.transform.Find("Name_Text").GetComponent<Text>();
+            dialogLabel = dialogPanel.transform.Find("Content_Text").GetComponent<Text>();
+            nameLabel = namePanel.transform.Find("Name_Text").GetComponent<Text>();
 
             nextIcon = dialogLabel.transform.Find("NextIcon_Image").gameObject;
             nextIcon.SetActive(showCursor);
@@ -58,43 +58,83 @@ namespace Assets.Script.Framework
 
             toggleAuto = mainContainer.transform.Find("QuickButton_Panel/Auto_Toggle").GetComponent<Toggle>();
 
-            avatarSprite = mainContainer.transform.Find("Avatar_Panel/Avatar_Image").GetComponent<Image>();
+            avatarSprite = avatarPanel.transform.Find("Avatar_Image").GetComponent<Image>();
         }
 
-        //将文字数据应用到UI上
+        public void InitDialogBox(string filename, Color color, Vector2 pos, Vector2 size)
+        {
+            Image backSprite = dialogPanel.GetComponent<Image>();
+            if (filename == string.Empty)
+            {
+                backSprite.sprite = null;
+                backSprite.color = color;
+                dialogPanel.GetComponent<RectTransform>().sizeDelta = size;
+            }
+            else
+            {
+                Debug.Log(filename);
+                backSprite.sprite = Resources.Load<Sprite>("UI/" + filename);
+                backSprite.SetNativeSize();
+            }
+            //Debug.Log(pos);
+            dialogPanel.GetComponent<RectTransform>().anchoredPosition = pos;
+        }
+
+        public void InitDialogLabel(float left, float top, float right, float bottom)
+        {
+            RectTransform rectT = dialogLabel.GetComponent<RectTransform>();
+            rectT.offsetMin = new Vector2(left, bottom);
+            rectT.offsetMax = new Vector2(-right, -top);
+        }
+
+        /// <summary>
+        /// 将文字数据应用到UI上
+        /// </summary>
+        /// <param name="currentPiece"></param>
+        /// <param name="name">角色姓名</param>
+        /// <param name="dialog">对话</param>
+        /// <param name="voice">语音文件</param>
+        /// <param name="avatar">头像文件</param>
         public void SetText(TextPiece currentPiece, string name, string dialog, string voice, string avatar = "")
         {
             // 设置成禁用右键和滚轮？
             DataManager.GetInstance().BlockRightClick();
             DataManager.GetInstance().BlockWheel();
             this.currentPiece = currentPiece;
-            // 人物名称
-            if (!string.IsNullOrEmpty(name))
-            {
-                nameBox.SetActive(true);
-                //nameLabel.text = AddColor(name);//添加颜色
-                nameLabel.text = name;
-            }
-            else
-            {
-                nameLabel.text = string.Empty;
-                nameBox.SetActive(false);
-            }
-            
-            // 替换已读文本
+            SetNameText(name);
+            // 替换主角姓名文本
             dialogLabel.text = ChangeName(dialog);
-            // TODO: 设定已读样式 和 不同角色不同文字
-            float a = DataManager.GetInstance().IsTextRead() ? 0.8f : 1f;
-            float r = dialogLabel.color.r;
-            float g = dialogLabel.color.g;
-            float b = dialogLabel.color.b;
-            dialogLabel.color = new Color(r, g, b, a);
+            SetContentStyle(dialog);
             // 打字机
             te.enabled = true;
             te.ResetToBeginning();
             typewriting = true;
             // 头像
             SetAvatar(avatar);
+        }
+
+        /// <summary>
+        /// 原有基础上添加文字
+        /// </summary>
+        /// <param name="currentPiece"></param>
+        /// <param name="dialog">文字</param>
+        /// <param name="voice">对应语音</param>
+        public void AddText(TextPiece currentPiece, string dialog, string voice)
+        {
+            // 设置成禁用右键和滚轮？
+            DataManager.GetInstance().BlockRightClick();
+            DataManager.GetInstance().BlockWheel();
+            this.currentPiece = currentPiece;
+            // 不显示姓名
+            namePanel.SetActive(false);
+            // 替换主角姓名文本
+            SetContentStyle(dialog);
+            // 打字机
+            te.enabled = true;
+            te.ResetTo(ChangeName(dialog));
+            typewriting = true;
+            // 关闭头像
+            avatarPanel.SetActive(false);
         }
 
         /// <summary>
@@ -106,6 +146,7 @@ namespace Assets.Script.Framework
             if (str == string.Empty)
             {
                 avatarSprite.sprite = null;
+                avatarPanel.SetActive(false);
             }
             else
             {
@@ -121,10 +162,42 @@ namespace Assets.Script.Framework
                 //顶边中心靠上
                 float h = avatarSprite.rectTransform.rect.height;
                 avatarSprite.transform.localPosition = new Vector3(0, -h / 2 + 140);
+                avatarPanel.SetActive(true);
             }
-
         }
 
+        /// <summary>
+        /// 设置人物名称
+        /// </summary>
+        /// <param name="name"></param>
+        private void SetNameText(string name)
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+                namePanel.SetActive(true);
+                //nameLabel.text = AddColor(name);//添加颜色
+                nameLabel.text = name;
+            }
+            else
+            {
+                nameLabel.text = string.Empty;
+                namePanel.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// 设置正文样式
+        /// </summary>
+        /// <param name="dialog"></param>
+        private void SetContentStyle(string dialog)
+        {
+            // TODO: 设定已读样式 和 不同角色不同文字
+            float a = DataManager.GetInstance().IsTextRead() ? 0.8f : 1f;
+            float r = dialogLabel.color.r;
+            float g = dialogLabel.color.g;
+            float b = dialogLabel.color.b;
+            dialogLabel.color = new Color(r, g, b, a);
+        }
 
         //瞬间完成打字
         public void FinishType()
@@ -147,6 +220,7 @@ namespace Assets.Script.Framework
             mainContainer.SetActive(false);
             closedbox = true;
         }
+
         //显示对话框
         public void ShowWindow()
         {
@@ -174,7 +248,7 @@ namespace Assets.Script.Framework
         {
             HideNextIcon();
             nameLabel.text = "";
-            nameBox.SetActive(false);
+            namePanel.SetActive(false);
             dialogLabel.text = "";
             avatarSprite.sprite = null;
         }
@@ -267,6 +341,7 @@ namespace Assets.Script.Framework
             ClearText();
             closedbox = false;
             //StartCoroutine(OpenUI(time, callback));
+            mainContainer.GetComponent<CanvasGroup>().alpha = 0;
             mainContainer.GetComponent<CanvasGroup>()
                 .DOFade(1, time)
                 .OnStart(() => {

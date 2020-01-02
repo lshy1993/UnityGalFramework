@@ -78,7 +78,7 @@ namespace Assets.Script.Framework.Node
         /// </summary>
         /// <param name="name">脚本名</param>
         /// <returns></returns>
-        public TextScript FindTextScript(string name)
+        public SharpScript FindTextScript(string name)
         {
             dm.gameData.currentTextPos = 0;
             dm.gameData.currentScript = name;
@@ -91,7 +91,7 @@ namespace Assets.Script.Framework.Node
         /// </summary>
         /// <param name="name">脚本名</param>
         /// <returns></returns>
-        public TextScript FindTextScriptNoneInit(string name)
+        public SharpScript FindTextScriptNoneInit(string name)
         {
             dm.gameData.currentScript = name;
             dm.gameData.MODE = "Avg模式";
@@ -99,7 +99,7 @@ namespace Assets.Script.Framework.Node
             return FindScript(name);
         }
 
-        private TextScript FindScript(string name)
+        private SharpScript FindScript(string name)
         {
             string classStr = SCRIPT_PATH + "." + name;
             try
@@ -107,7 +107,7 @@ namespace Assets.Script.Framework.Node
                 Type t = Type.GetType(classStr);
                 Debug.Log(t);
                 object[] args = new object[] { dm, root, ps };
-                TextScript script = (TextScript)Activator.CreateInstance(t, args);
+                SharpScript script = (SharpScript)Activator.CreateInstance(t, args);
                 return script;
             }
             catch(Exception e)

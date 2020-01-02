@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Assets.Script.Framework.Node
 {
-    public abstract class TextScript : GameNode
+    public abstract class SharpScript : GameNode
     {
         /// <summary>
         /// 当前句块编号
@@ -25,7 +25,7 @@ namespace Assets.Script.Framework.Node
         protected PieceFactory f;
         protected NodeFactory nodeFactory;
 
-        public TextScript(DataManager manager, GameObject root, PanelSwitch ps) : base(manager, root, ps)
+        public SharpScript(DataManager manager, GameObject root, PanelSwitch ps) : base(manager, root, ps)
         {
         }
 
@@ -107,8 +107,12 @@ namespace Assets.Script.Framework.Node
                     manager.isEffecting = true;
                     manager.BlockRightClick();
                     DiaboxPiece dp = (DiaboxPiece)pieces[current];
-                    dp.ExecAuto(new Action(() => { manager.isEffecting = false; manager.UnblockRightClick(); Update(); }));
-                    current = dp.Next();
+                    dp.ExecAuto(() => {
+                        manager.isEffecting = false;
+                        manager.UnblockRightClick();
+                        current = dp.Next();
+                        Update();
+                    });
                 }
                 //else if (pieces[current].GetType() == typeof(InputPiece))
                 //{
@@ -127,10 +131,10 @@ namespace Assets.Script.Framework.Node
                     if (tsp.finished)
                     {
                         tsp.ExecAuto(() => {
+                            current = tsp.Next();
                             manager.UnblockRightClick();
                             Update();
                         });
-                        current = tsp.Next();
                     }
                     else
                     {
@@ -143,7 +147,7 @@ namespace Assets.Script.Framework.Node
                     TextPiece t = (TextPiece)pieces[current];
                     if (t.finish)
                     {
-                        t.Clear();
+                        //t.Clear(); 交给textpiece内部处理
                         current = t.Next();
                         Update();
                     }

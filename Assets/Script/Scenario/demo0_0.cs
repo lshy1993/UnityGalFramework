@@ -10,15 +10,22 @@ using UnityEngine;
 
 namespace Assets.Script.Scenario
 {
-    public class demo0_0 : TextScript
+    public class demo0_0 : SharpScript
     {
         public demo0_0(DataManager manager, GameObject root, PanelSwitch ps):base(manager, root, ps) { }
         public override void InitText()
         {
             pieces = new List<Piece>()
             {
+                f.SetDialogWindow(),
                 f.OpenDialog(),
-                f.t("","要跳过序章测试吗？"),
+                f.l("要跳过序章测试吗？1111"),
+                f.l("要跳过序章测试吗？2222"),
+                f.t("要跳过序章测试吗？"),
+                f.CloseDialog(),
+                f.SetDialogWindow(new Vector2(1920,220), "bg_ndialog", new Vector2(0,0), new Vector4(280,50,280,30)),
+                f.OpenDialog(),
+                f.t("要跳过<color=#555>序章</color>测试吗？"),
             };
         }
 

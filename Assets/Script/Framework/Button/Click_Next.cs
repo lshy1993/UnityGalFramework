@@ -86,7 +86,7 @@ namespace Assets.Script.Framework.UI
         private void ScriptUpdate()
         {
             //否则根据Script类型执行Update
-            if (typeof(TextScript).IsInstanceOfType(gm.GetCurrentNode()))
+            if (typeof(SharpScript).IsInstanceOfType(gm.GetCurrentNode()))
             {
                 gm.GetCurrentNode().Update();
             }

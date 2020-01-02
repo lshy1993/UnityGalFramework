@@ -23,16 +23,16 @@ namespace Assets.Script.Framework.Node
 
         private Text nameLabel, dialogLabel;
         private Image avatarSprite;
-        private DataManager manager;
+        private DataManager dm;
 
         private GameObject msgpanel;
         //private GameObject timepanel, diaboxpanel, fulldiapanel, evipanel, hpui, inputpanel, sidepanel;
 
         private int id = 0;
 
-        public PieceFactory(GameObject root, DataManager manager)
+        public PieceFactory(GameObject root, DataManager dm)
         {
-            this.manager = manager;
+            this.dm = dm;
             this.root = root;
 
             msgpanel = root.transform.Find("Avg_Panel/Message_Panel").gameObject;
@@ -49,62 +49,91 @@ namespace Assets.Script.Framework.Node
         /// <summary>
         /// 生成一个简单的文字段
         /// </summary>
-        /// <param name="name">名字,设为空则不改变</param>
-        /// <param name="dialog">内容，空则不改变</param>
-        public TextPiece t(string name = "", string dialog = "", string avatar = "", string voice = "", int model = -1)
+        /// <param name="dialog">正文</param>
+        /// <param name="name">角色名字</param>
+        /// <param name="voice">语音文件</param>
+        /// <param name="avatar">头像</param>
+        /// <param name="model">l2d模型</param>
+        public TextPiece t(string dialog, string name = "", string voice = "", string avatar = "", int model = -1)
         {
-            //return new TextPiece(id++, nameLabel, dialogLabel, avatarSprite, name, dialog, avatar);
-            return new TextPiece(id++, msgpanel, name, dialog, avatar, voice, model);
+            return new TextPiece(id++, msgpanel, dialog, name, avatar, voice, model);
         }
 
         /// <summary>
         /// 生成一个带有简单逻辑的文字段
         /// </summary>
-        /// <param name="name">名字，空则不改变</param>
-        /// <param name="dialog">内容，空则不改变</param>
+        /// <param name="dialog">正文</param>
+        /// <param name="name">角色名字</param>
+        /// <param name="voice">对话内容</param>
+        /// <param name="avatar">头像图片名</param>
+        /// <param name="model">l2d模型</param>
         /// <param name="simpleLogic">简单逻辑跳转,是一个返回int值的lambda表达式</param>
-        public TextPiece t(string name, string dialog, string avatar, string voice, Func<int> simpleLogic)
+        public TextPiece t(string dialog, string name, string voice, string avatar, int model, Func<int> simpleLogic)
         {
-            //return new TextPiece(id++, nameLabel, dialogLabel, avatarSprite, name, dialog, avatar, simpleLogic);
-            return new TextPiece(id++, msgpanel, name, dialog, avatar, voice, simpleLogic);
+            TextPiece tp = new TextPiece(id++, msgpanel, dialog, name, avatar, voice, model);
+            tp.RunSimpleLogic(dm, simpleLogic);
+            return tp;
         }
 
         /// <summary>
         /// 生成一个带有复杂跳转的文字段
         /// </summary>
-        /// <param name="name">名字，空则不改变</param>
-        /// <param name="dialog">内容，空则不改变</param>
+        /// <param name="dialog">正文</param>
+        /// <param name="name">角色名字</param>
+        /// <param name="voice">对话内容</param>
+        /// <param name="avatar">头像图片名</param>
+        /// <param name="model">l2d模型</param>
         /// <param name="complexLogic">复杂逻辑跳转，是一个形如(Hashtabel gVars, Hashtable lVars)=> {return ... }的lambda表达式</param>
-        public TextPiece t(string name, string dialog, string avatar, string voice, Func<DataManager, int> complexLogic)
+        public TextPiece t(string dialog, string name, string voice, string avatar, int model, Func<DataManager, int> complexLogic)
         {
-            //return new TextPiece(id++, nameLabel, dialogLabel, avatarSprite, manager, complexLogic, name, dialog, avatar);
-            return new TextPiece(id++, msgpanel, manager, complexLogic, name, dialog, avatar, voice);
+            TextPiece tp = new TextPiece(id++, msgpanel, dialog, name, avatar, voice, model);
+            tp.RunComplexLogic(dm, complexLogic);
+            return tp;
         }
 
-        public TextPiece t(string name, string dialog, string avatar, string voice, Action action)
+        public TextPiece t(string dialog, string name, string voice, string avatar, int model, Action action)
         {
-            //return new TextPiece(id++, nameLabel, dialogLabel, avatarSprite, manager, action, name, dialog, avatar);
-            return new TextPiece(id++, msgpanel, manager, action, name, dialog, avatar, voice);
+            TextPiece tp = new TextPiece(id++, msgpanel, dialog, name, avatar, voice, model);
+            tp.RunAction(action);
+            return tp;
         }
 
-        public TextPiece t(string name, string dialog, string avatar, string voice, Action<DataManager> action)
+        public TextPiece t(string name, string dialog, string avatar, string voice, int model, Action<DataManager> action)
         {
-            // return new TextPiece(id++, nameLabel, dialogLabel, avatarSprite, manager, action, name, dialog, avatar);
-            return new TextPiece(id++, msgpanel, manager, action, name, dialog, avatar, voice);
-        }
-
-        public ExecPiece s(ExecPiece.Execute setVar)
-        {
-            return new ExecPiece(id++, manager, setVar);
+            TextPiece tp = new TextPiece(id++, msgpanel, dialog, name, avatar, voice, model);
+            tp.RunAction(action);
+            return tp;
         }
 
         /// <summary>
-        /// 生成一个简单的全屏文字块
+        /// 生成一个页面文字块
         /// </summary>
-        /// <returns></returns>
-        public TextPiece sc(string dialog)
+        /// <param name="dialog">正文</param>
+        /// <param name="voice">语音文件</param>
+        public TextPiece l(string dialog, string voice="", int model = -1)
         {
-            return new TextPiece(id++, msgpanel, "", dialog, "", "");
+            TextPiece tp = new TextPiece(id++, msgpanel, dialog, "", "", voice, model);
+            tp.SetPageLine();
+            return tp;
+        }
+
+        /// <summary>
+        /// 清空页面
+        /// </summary>
+        public TextPiece p()
+        {
+            TextPiece tp = new TextPiece(id++, msgpanel);
+            return tp;
+        }
+
+        /// <summary>
+        /// 数据执行块
+        /// </summary>
+        /// <param name="setVar"></param>
+        /// <returns></returns>
+        public ExecPiece s(ExecPiece.Execute setVar)
+        {
+            return new ExecPiece(id++, dm, setVar);
         }
         #endregion
 
@@ -877,6 +906,76 @@ namespace Assets.Script.Framework.Node
         //{
         //    return new HPPiece(id++, hpui, x);
         //}
+
+        public DiaboxPiece SetDialogWindow()
+        {
+            DiaboxPiece dp = new DiaboxPiece(id++, msgpanel);
+            return dp;
+        }
+
+        public DiaboxPiece SetDialogWindow(Vector2 size)
+        {
+            DiaboxPiece dp = new DiaboxPiece(id++, msgpanel);
+            dp.size = size;
+            return dp;
+        }
+
+        public DiaboxPiece SetDialogWindow(Vector2 size, Color color)
+        {
+            DiaboxPiece dp = new DiaboxPiece(id++, msgpanel);
+            dp.size = size;
+            dp.color = color;
+            //dp.color = new Color(color.r, color.g, color.b, opacity);
+            return dp;
+        }
+
+        public DiaboxPiece SetDialogWindow(Vector2 size, Color color, Vector2 pos)
+        {
+            DiaboxPiece dp = new DiaboxPiece(id++, msgpanel);
+            dp.size = size;
+            dp.color = color;
+            //dp.color = new Color(color.r, color.g, color.b, opacity);
+            dp.pos = pos;
+            return dp;
+        }
+
+        public DiaboxPiece SetDialogWindow(Vector2 size, Color color, Vector2 pos, Vector4 rect, float xint = 0, float yint = 0)
+        {
+            DiaboxPiece dp = new DiaboxPiece(id++, msgpanel);
+            dp.size = size;
+            dp.color = color;
+            //dp.color = new Color(color.r, color.g, color.b, opacity);
+            dp.pos = pos;
+            dp.rect = rect;
+            return dp;
+        }
+
+        public DiaboxPiece SetDialogWindow(Vector2 size, string filename)
+        {
+            DiaboxPiece dp = new DiaboxPiece(id++, msgpanel);
+            dp.size = size;
+            dp.filename = filename;
+            return dp;
+        }
+
+        public DiaboxPiece SetDialogWindow(Vector2 size, string filename, Vector2 pos)
+        {
+            DiaboxPiece dp = new DiaboxPiece(id++, msgpanel);
+            dp.size = size;
+            dp.filename = filename;
+            dp.pos = pos;
+            return dp;
+        }
+
+        public DiaboxPiece SetDialogWindow(Vector2 size, string filename, Vector2 pos, Vector4 rect, float xint = 0, float yint = 0)
+        {
+            DiaboxPiece dp = new DiaboxPiece(id++, msgpanel);
+            dp.size = size;
+            dp.filename = filename;
+            dp.pos = pos;
+            dp.rect = rect;
+            return dp;
+        }
 
         /// <summary>
         /// 隐去对话框

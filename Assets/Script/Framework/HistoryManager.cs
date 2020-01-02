@@ -94,9 +94,11 @@ namespace Assets.Script.Framework
         /// <param name="dialog"></param>
         public void SetCurrentText(string name, string dialog)
         {
+            string dtp = string.IsNullOrEmpty(dialog) ? "" : rx.Replace(dialog, "");
+            string ntp = string.IsNullOrEmpty(name) ? "" : rx.Replace(name, "");
             // 去掉颜色标签符号
-            DataManager.GetInstance().tempData.currentText = rx.Replace(dialog, "");
-            DataManager.GetInstance().tempData.currentName = rx.Replace(name, "");
+            DataManager.GetInstance().tempData.currentText = dtp;
+            DataManager.GetInstance().tempData.currentName = name;
             // 更已读
             SetReaded();
         }

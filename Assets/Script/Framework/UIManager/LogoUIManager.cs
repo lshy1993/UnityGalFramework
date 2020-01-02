@@ -66,7 +66,7 @@ namespace Assets.Script.Framework.UI
         public void Skip()
         {
             // 已经在淡出无法跳过
-            if (currentStep % 2 == 0) return;
+            if (currentStep % 2 == 0 || (currentStep / 2) >= logoPanels.Count()) return;
             StopAllCoroutines();
             StartCoroutine(SkipAnimate(currentStep));
         }

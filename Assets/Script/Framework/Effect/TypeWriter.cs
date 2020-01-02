@@ -33,6 +33,7 @@ namespace Assets.Script.Framework.Effect
         private Text mLabel;
 
         // 全文本
+        private string mLastText = "";
         private string mFullText = "";
         private int mCurrentOffset = 0;
         private float mNextChar = 0f;
@@ -67,6 +68,21 @@ namespace Assets.Script.Framework.Effect
                 .Play();
         }
 
+        public void ResetTo(string wstr)
+        {
+            mFinished = false;
+            mReset = false;
+            mLabel = GetComponent<Text>();
+            mFullText = mLabel.text + "\n" + wstr;
+            float duration = mFullText.Length / charsPerSecond;
+            DOTween.Kill(GetComponent<Text>());
+            GetComponent<Text>()
+                .DOText(mFullText, duration)
+                .SetEase(Ease.Linear)
+                .OnComplete(() => { Finish(); })
+                .Play();
+        }
+
         /// <summary>
         /// 结束打字 显示全部文本
         /// </summary>
@@ -92,60 +108,6 @@ namespace Assets.Script.Framework.Effect
         //void OnEnable() { mReset = true; mFinished = false; }
 
         //void OnDisable() { Finish(); }
-
-        void Update()
-        {
-            return;
-            if (mFinished) return;
-            if (mReset)
-            {
-                mCurrentOffset = 0;
-                mReset = false;
-                mLabel = GetComponent<Text>();
-                mFullText = mLabel.text;
-                //mFullText = mLabel.processedText;
-            }
-            if (string.IsNullOrEmpty(mFullText)) return;
-
-            while (mCurrentOffset < mFullText.Length && mNextChar <= Time.time)
-            {
-                int lastOffset = mCurrentOffset;
-                charsPerSecond = Mathf.Max(1, charsPerSecond);
-
-                // Automatically skip all symbols
-                //if (mLabel.supportEncoding)
-                //    while (NGUIText.ParseSymbol(mFullText, ref mCurrentOffset)) { }
-
-                ++mCurrentOffset;
-
-                // Reached the end? We're done.
-                if (mCurrentOffset > mFullText.Length) break;
-
-                float delay = 1f / charsPerSecond;
-
-                if (mNextChar == 0f)
-                {
-                    mNextChar = Time.time + delay;
-                }
-                else
-                {
-                    mNextChar += delay;
-                }
-                mLabel.text = mFullText.Substring(0, mCurrentOffset);
-            }
-
-            // Alpha-based fading
-            if (mFullText.Length > 0 && mCurrentOffset >= mFullText.Length)
-            {
-                mLabel.text = mFullText;
-                current = this;
-                onFinished.Invoke();
-                //EventDelegate.Execute(onFinished);
-                current = null;
-                mFinished = true;
-            }
-
-        }
 
     }
 }

@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Assets.Script.Scenario
 {
-    public class demo1 : TextScript
+    public class demo1 : SharpScript
     {
         public demo1(DataManager manager, GameObject root, PanelSwitch ps) : base(manager, root, ps) { }
         public override void InitText()
