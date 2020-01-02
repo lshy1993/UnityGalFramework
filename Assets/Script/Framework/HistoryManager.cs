@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 using Assets.Script.Framework.UI;
 
@@ -23,6 +24,9 @@ namespace Assets.Script.Framework
 
         // 滚动条
         public Scrollbar bar;
+
+
+        private Regex rx = new Regex(@"\[[^\]]+\]");
 
 
         /// <summary>
@@ -55,7 +59,7 @@ namespace Assets.Script.Framework
             go.transform.localScale = Vector3.one;
             go.transform.localPosition = Vector3.zero;
 
-            table.GetComponent<VerticalLayoutGroup>().SetLayoutVertical();
+            //table.GetComponent<VerticalLayoutGroup>().SetLayoutVertical();
 
             float w = table.GetComponent<RectTransform>().sizeDelta.x;
             table.GetComponent<RectTransform>().sizeDelta = new Vector2(w, table.transform.childCount * 200);
@@ -81,6 +85,36 @@ namespace Assets.Script.Framework
                 Destroy(table.transform.GetChild(0).gameObject);
             }
             DataManager.GetInstance().AddHistory(bt);
+        }
+
+        /// <summary>
+        /// 记录当前的文本
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="dialog"></param>
+        public void SetCurrentText(string name, string dialog)
+        {
+            // 去掉颜色标签符号
+            DataManager.GetInstance().tempData.currentText = rx.Replace(dialog, "");
+            DataManager.GetInstance().tempData.currentName = rx.Replace(name, "");
+            // 更已读
+            SetReaded();
+        }
+
+        public void SetReaded()
+        {
+            string script = DataManager.GetInstance().gameData.currentScript;
+            int id = DataManager.GetInstance().gameData.currentTextPos;
+
+            Dictionary<string, int> dic = DataManager.GetInstance().multiData.scriptTable;
+            if (dic.ContainsKey(script))
+            {
+                dic[script] = Mathf.Max(dic[script], id);
+            }
+            else
+            {
+                dic.Add(script, id);
+            }
         }
     }
 

@@ -78,6 +78,7 @@ namespace Assets.Script.Framework
         /// </summary>
         void Init()
         {
+            //Debug.Log("audip clip:"+ fileName);
             //控制：需要中间循环的音乐 准备2个souce
             AudioClip ac0 = Resources.Load<AudioClip>("Audio/" + fileName);
             AudioClip ac1 = Resources.Load<AudioClip>("Audio/" + fileName + "_NoIntro");

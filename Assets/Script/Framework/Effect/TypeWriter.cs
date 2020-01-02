@@ -62,6 +62,7 @@ namespace Assets.Script.Framework.Effect
             //Debug.Log(mFullText + duration);
             GetComponent<Text>()
                 .DOText(mFullText, duration)
+                .SetEase(Ease.Linear)
                 .OnComplete(()=> { Finish(); })
                 .Play();
         }

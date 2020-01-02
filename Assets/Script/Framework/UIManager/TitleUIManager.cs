@@ -3,11 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
+using Assets.Script.Framework.Effect;
 using Assets.Script.Framework.Data;
 
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+
+using DG.Tweening;
 
 namespace Assets.Script.Framework.UI
 {
@@ -18,13 +21,15 @@ namespace Assets.Script.Framework.UI
     {
         public GameManager gm;
         public SystemUIManager sysm;
+        public SaveLoadUIManager slum;
+        public AnimationCurve ac;
 
-        //private UIWidget titleCon, extraCon;
-        //private UIWidget musicCon, galleryCon, recollectionCon, endingCon;
         private GameObject titleCon;
-        private GameObject btnTable, largeCon, particleCon;
-        private GameObject bg, videobg;
+        private GameObject btnCon;
+
+        private GameObject bg, videoCon;
         private Text verLabel;
+        //public TitleVideoEffect tve;
 
         /// <summary>
         /// 鼠标微动背景
@@ -41,7 +46,7 @@ namespace Assets.Script.Framework.UI
         /// <summary>
         /// 动态背景
         /// </summary>
-        public bool videoBackground = false;
+        public bool videoBackground = true;
 
         /// <summary>
         /// 动态粒子特效
@@ -49,30 +54,25 @@ namespace Assets.Script.Framework.UI
         public bool dynamicParticle = false;
 
         private Constants.TITLE_STATUS status;
+        private bool isPressed = false;
 
         void Awake()
         {
             status = Constants.TITLE_STATUS.TITLE;
 
             titleCon = transform.Find("Title_Container").gameObject;
-            //extraCon = transform.Find("ExtraButton_Container").GetComponent<UIWidget>();
-            //musicCon = transform.Find("Music_Container").GetComponent<UIWidget>();
-            //galleryCon = transform.Find("Gallery_Container").GetComponent<UIWidget>();
-            //recollectionCon = transform.Find("Recollection_Container").GetComponent<UIWidget>();
-            //endingCon = transform.Find("Ending_Container").GetComponent<UIWidget>();
-
-            //btnTable = titleCon.transform.Find("MainButton_Table").gameObject;
-            //largeCon = galleryCon.transform.Find("Large_Container").gameObject;
-            //particleCon = titleCon.transform.Find("Particle_Container").gameObject;
+            btnCon = transform.Find("MainButton_Table").gameObject;
 
             bg = transform.Find("Back_Sprite").gameObject;
-            videobg = transform.Find("Video_Sprite").gameObject;
-            verLabel = transform.Find("Title_Container/Version_Label").GetComponent<Text>();
+            videoCon = transform.Find("Video_Sprite").gameObject;
+
+            verLabel = transform.Find("Other_Container/Version_Label").GetComponent<Text>();
             originPoint = bg.GetComponent<RectTransform>().anchoredPosition;
         }
 
         private void OnEnable()
         {
+            Debug.Log("Title UI Manager Enabled!");
             //初始化时播放BGM
             //gm.sm.SetBGM("Title");
             verLabel.text = DataManager.GetInstance().version;
@@ -82,19 +82,12 @@ namespace Assets.Script.Framework.UI
             if (videoBackground)
             {
                 bg.SetActive(false);
-                videobg.SetActive(true);
-                VideoPlayer vp = videobg.GetComponent<VideoPlayer>();
-                //vp.url = Path.Combine(Application.streamingAssetsPath, "title_loop.mp4");
-                vp.isLooping = true;
-                vp.Play();
-                RawImage ri = videobg.GetComponent<RawImage>();
-                ri.texture = vp.targetTexture;
-                Debug.Log("video played!" + Time.time);
+                videoCon.SetActive(true);
             }
             else
             {
                 bg.SetActive(true);
-                videobg.SetActive(false);
+                videoCon.SetActive(false);
             }
         }
 
@@ -127,44 +120,61 @@ namespace Assets.Script.Framework.UI
             return status;
         }
 
+        /// <summary>
+        /// 初始化title界面
+        /// </summary>
+        public void Init()
+        {
+            isPressed = false;
+            titleCon.SetActive(true);
+            titleCon.GetComponent<CanvasGroup>().alpha = 1;
+            //videoCon.transform.localPosition = Vector3.zero;
+            //videoCon.GetComponent<CanvasGroup>().alpha = 0;
+            //videohover.SetActive(true);
+            //videohover.GetComponent<RawImage>().color = new Color(1, 1, 1, 1);
+            InitBtn();
+        }
+
+        /// <summary>
+        /// 初始化按钮位置
+        /// </summary>
+        private void InitBtn()
+        {
+            btnCon.SetActive(false);
+            for (int i = 0; i < btnCon.transform.childCount; i++)
+            {
+                RectTransform rt =
+                btnCon.transform.GetChild(i)
+                    .GetComponent<RectTransform>();
+                Vector3 vet = rt.anchoredPosition;
+                rt.anchoredPosition = new Vector3(220, vet.y, vet.z);
+            }
+        }
+
         //标题画面右键
         public void RightClick()
         {
-            //switch (status)
-            //{
-            //    case Constants.TITLE_STATUS.EXTRA:
-            //        RightClickReturn();
-            //        break;
-            //    case Constants.TITLE_STATUS.GALLERY:
-            //        if (largeCon.activeSelf)
-            //        {
-            //            //galleryCon.GetComponent<GalleryUIManager>().ClosePic();
-            //        }
-            //        else
-            //        {
-            //            CloseGallery();
-            //        }
-            //        break;
-            //    case Constants.TITLE_STATUS.MUSIC:
-            //        CloseMusic();
-            //        break;
-            //    case Constants.TITLE_STATUS.RECOLL:
-            //        CloseRecollection();
-            //        break;
-            //    case Constants.TITLE_STATUS.ENDING:
-            //        CloseEnding();
-            //        break;
-            //    default:
-            //        break;
-            //}
+
+        }
+
+        //标题画面左键
+        public void LeftClick()
+        {
+            if (isPressed) return;
+            isPressed = true;
         }
 
         #region public Title相关按钮
         public void ClickStart()
         {
             //新游戏start
-            gm.sm.StopBGM();
             gm.NewGame();
+        }
+
+        public void ClickContinue()
+        {
+            //继续游戏
+            gm.Continue();
         }
 
         public void ClickExtra()
@@ -213,7 +223,7 @@ namespace Assets.Script.Framework.UI
         }
         #endregion
 
-        //#region public Extra开关
+        #region public Extra开关
         //public void OpenMusic()
         //{
         //    if (Input.GetMouseButtonUp(0))
@@ -276,7 +286,7 @@ namespace Assets.Script.Framework.UI
         //    StartCoroutine(FadeOut(endingCon));
         //    StartCoroutine(FadeIn(extraCon));
         //}
-        //#endregion
+        #endregion
 
         //private IEnumerator OpenExtra()
         //{

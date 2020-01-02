@@ -15,7 +15,6 @@ namespace Assets.Script.Framework.Node
     /// </summary>
     public class EffectPiece : Piece
     {
-        //private Queue<ImageEffect> effects;
         private Queue<NewImageEffect> effects;
         private bool syn;
 
@@ -58,7 +57,8 @@ namespace Assets.Script.Framework.Node
             else
             {
                 NewImageEffect effect = effectQueue.Dequeue();
-                GameObject.Find("GameManager").GetComponent<ImageManager>().RunEffect(effect, new Action(() => { }));
+                ImageManager im = GameObject.Find("GameManager").GetComponent<ImageManager>();
+                im.Run(effect, new Action(() => { }));
                 RunEffectsSyn(effectQueue, callback);
             }
         }
@@ -74,7 +74,10 @@ namespace Assets.Script.Framework.Node
             else
             {
                 NewImageEffect effect = effectQueue.Dequeue();
-                GameObject.Find("GameManager").GetComponent<ImageManager>().RunEffect(effect, new Action(() => { RunEffectsAsyn(effectQueue, callback); }));
+                ImageManager im = GameObject.Find("GameManager").GetComponent<ImageManager>();
+                im.Run(effect, new Action(() => {
+                    RunEffectsAsyn(effectQueue, callback);
+                }));
             }
         }
 

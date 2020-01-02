@@ -18,6 +18,8 @@ namespace Assets.Script.Framework.Data
         /// </summary>
         public Queue<BacklogText> backLog;
 
+        public string currentName;
+
         /// <summary>
         /// 当前的文本
         /// </summary>

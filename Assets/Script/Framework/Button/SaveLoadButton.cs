@@ -9,6 +9,11 @@ namespace Assets.Script.Framework.UI
         public SaveLoadUIManager uiManager;
         public int id;
 
+        protected override void Hover(bool ishover)
+        {
+            uiManager.HoverSave(id,ishover);
+        }
+
         protected override void SE_Click()
         {
             //null
@@ -16,7 +21,7 @@ namespace Assets.Script.Framework.UI
 
         protected override void Execute()
         {
-            Debug.Log("SaveLoad");
+            //Debug.Log("SaveLoad");
             uiManager.SelectSave(id);
         }
 

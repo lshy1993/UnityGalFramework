@@ -10,7 +10,7 @@ namespace Assets.Script.Framework.Effect
     {
         private NewImageEffect imageEffect;
 
-        public NewEffectBuilder UI(NewImageEffect.ImageType target)
+        private NewEffectBuilder UI(NewImageEffect.ImageType target)
         {
             imageEffect = new NewImageEffect();
             imageEffect.state = new SpriteState();
@@ -18,7 +18,7 @@ namespace Assets.Script.Framework.Effect
             return this;
         }
 
-        public NewEffectBuilder UI(int depth)
+        private NewEffectBuilder UI(int depth)
         {
             imageEffect = new NewImageEffect();
             imageEffect.state = new SpriteState();
@@ -27,31 +27,70 @@ namespace Assets.Script.Framework.Effect
             return this;
         }
 
-        public NewEffectBuilder Operate(NewImageEffect.OperateMode operate)
+        private NewEffectBuilder Operate(NewImageEffect.OperateMode operate)
         {
             imageEffect.operate = operate;
             return this;
         }
 
-        public NewEffectBuilder TotalTime(float time)
+        private NewEffectBuilder Movie(bool ison)
+        {
+            imageEffect.movie = ison;
+            return this;
+        }
+
+        private NewEffectBuilder Loop(bool isloop)
+        {
+            imageEffect.loop = isloop;
+            return this;
+        }
+
+        private NewEffectBuilder Trans(NewImageEffect.TransMode operate)
+        {
+            imageEffect.transmode = operate;
+            return this;
+        }
+        private NewEffectBuilder Effect(NewImageEffect.EffectMode operate)
+        {
+            imageEffect.effectmode = operate;
+            return this;
+        }
+        private NewEffectBuilder Action(NewImageEffect.ActionMode operate)
+        {
+            imageEffect.actionmode = operate;
+            return this;
+        }
+        private NewEffectBuilder Live2d(NewImageEffect.Live2dMode operate)
+        {
+            imageEffect.l2dmode = operate;
+            return this;
+        }
+
+        private NewEffectBuilder TotalTime(float time)
         {
             imageEffect.time = time;
             return this;
         }
 
-        public NewEffectBuilder Source(string name)
+        private NewEffectBuilder Sync(bool sync)
+        {
+            imageEffect.sync = sync;
+            return this;
+        }
+
+        private NewEffectBuilder Source(string name)
         {
             imageEffect.state.spriteName = name;
             return this;
         }
 
-        public NewEffectBuilder Mask(string image)
+        private NewEffectBuilder Mask(string image)
         {
             imageEffect.maskImage = image;
             return this;
         }
 
-        public NewEffectBuilder Direction(string direction)
+        private NewEffectBuilder Direction(string direction)
         {
             imageEffect.direction = NewImageEffect.Direction.Left;
             if (direction.Equals("left",StringComparison.OrdinalIgnoreCase))
@@ -65,43 +104,55 @@ namespace Assets.Script.Framework.Effect
             return this;
         }
 
-        public NewEffectBuilder Direction(bool inverse)
+        private NewEffectBuilder Direction(bool inverse)
         {
             imageEffect.inverse = inverse;
             return this;
         }
 
-        public NewEffectBuilder FinalAlpha(float alpha)
+        private NewEffectBuilder FinalAlpha(float alpha)
         {
             imageEffect.state.spriteAlpha = alpha;
             return this;
         }
 
-        public NewEffectBuilder FinalPosition(Vector3 pos)
+        private NewEffectBuilder FinalPosition(Vector3 pos)
         {
             imageEffect.state.SetPosition(pos);
             return this;
         }
 
-        public NewEffectBuilder FinalPosition(string str)
+        private NewEffectBuilder FinalPosition(string str)
         {
             imageEffect.defaultpos = str;
             return this;
         }
 
-        public NewEffectBuilder Frequency(int freq)
+        private NewEffectBuilder Scale(Vector3 scale)
+        {
+            imageEffect.scale = scale;
+            return this;
+        }
+
+        private NewEffectBuilder Rotate(Vector3 angle)
+        {
+            imageEffect.angle = angle;
+            return this;
+        }
+
+        private NewEffectBuilder Frequency(int freq)
         {
             imageEffect.freq = freq;
             return this;
         }
 
-        public NewEffectBuilder Variation(float v)
+        private NewEffectBuilder Variation(float v)
         {
             imageEffect.v = v;
             return this;
         }
 
-        public NewImageEffect Get() { return imageEffect; }
+        private NewImageEffect Get() { return imageEffect; }
 
 
         public static NewImageEffect Wait(float time)
@@ -125,123 +176,15 @@ namespace Assets.Script.Framework.Effect
         }
 
 
-        #region 背景图相关操作
-        public static NewImageEffect RotateFade(string sprite, bool inverse, float time)
+        #region 图层相关操作
+        public static NewImageEffect SetBackSprite(string sprite, bool isMovie = false, bool isLoop = false)
         {
             NewEffectBuilder builder = new NewEffectBuilder();
             NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
                 .Source(sprite)
-                .TotalTime(time)
-                .Direction(inverse)
-                .Operate(NewImageEffect.OperateMode.RotateFade)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect SideFade(string sprite, string direction, float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Source(sprite)
-                .TotalTime(time)
-                .Direction(direction)
-                .Operate(NewImageEffect.OperateMode.SideFade)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect Circle(string sprite, bool inverse, float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Source(sprite)
-                .TotalTime(time)
-                .Direction(inverse)
-                .Operate(NewImageEffect.OperateMode.Circle)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect Scroll(string sprite, string direction, float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Source(sprite)
-                .TotalTime(time)
-                .Direction(direction)
-                .Operate(NewImageEffect.OperateMode.Scroll)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect ScrollBoth(string sprite, string direction, float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Source(sprite)
-                .TotalTime(time)
-                .Direction(direction)
-                .Operate(NewImageEffect.OperateMode.ScrollBoth)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect Mask(string sprite, string mask, float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Source(sprite)
-                .TotalTime(time)
-                .Mask(mask)
-                .Operate(NewImageEffect.OperateMode.Mask)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect Shutter(string sprite, string direction, float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Source(sprite)
-                .TotalTime(time)
-                .Direction(direction)
-                .Operate(NewImageEffect.OperateMode.Shutter)
-                .Get();
-            return e;
-        }
-        
-        public static NewImageEffect Blur()
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Operate(NewImageEffect.OperateMode.Blur)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect Mosaic()
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Operate(NewImageEffect.OperateMode.Mosaic)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect Gray()
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Operate(NewImageEffect.OperateMode.Gray)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect OldPhoto()
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Operate(NewImageEffect.OperateMode.OldPhoto)
+                .Operate(NewImageEffect.OperateMode.Set)
+                .Movie(isMovie)
+                .Loop(isLoop)
                 .Get();
             return e;
         }
@@ -256,46 +199,87 @@ namespace Assets.Script.Framework.Effect
             return e;
         }
 
-        public static NewImageEffect SetBackSprite(string sprite)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .Source(sprite)
-                .Operate(NewImageEffect.OperateMode.SetSprite)
-                .Get();
-            return e;
-        }
+        //public static NewImageEffect PreTransBackSprite(string sprite)
+        //{
+        //    NewEffectBuilder builder = new NewEffectBuilder();
+        //    NewImageEffect e = builder.UI(-1)
+        //        .Source(sprite)
+        //        .Operate(NewImageEffect.OperateMode.PreTrans)
+        //        .Get();
+        //    return e;
+        //}
 
-        public static NewImageEffect FadeInBackSprite(float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.Fade)
-                .FinalAlpha(1)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect FadeOutBackSprite(float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
-                .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.Fade)
-                .FinalAlpha(0)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect PreTransBackSprite(string sprite)
+        public static NewImageEffect PreTransBackSprite()
         {
             NewEffectBuilder builder = new NewEffectBuilder();
             NewImageEffect e = builder.UI(-1)
-                .Source(sprite)
                 .Operate(NewImageEffect.OperateMode.PreTrans)
                 .Get();
             return e;
+        }
+
+        public static NewImageEffect SetPostionByDepth(int depth, Vector3 position)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(depth)
+                .Operate(NewImageEffect.OperateMode.SetPos)
+                .FinalPosition(position)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect SetDefaultPostionByDepth(int depth, string pstr)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(depth)
+                .Operate(NewImageEffect.OperateMode.SetPos)
+                .FinalPosition(pstr)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect SetRotateByDepth(int depth, Vector3 angle)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(depth)
+                .Operate(NewImageEffect.OperateMode.SetRotate)
+                .Rotate(angle)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect SetAlphaByDepth(int depth, float alpha)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(depth)
+                .Operate(NewImageEffect.OperateMode.SetAlpha)
+                .FinalAlpha(alpha)
+                .Get();
+            return e;
+        }
+        public static NewImageEffect SetSpriteByDepth(int depth, string sprite, bool isMovie = false)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(depth)
+                .Source(sprite)
+                .Operate(NewImageEffect.OperateMode.Set)
+                .Movie(isMovie)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect DeleteSpriteByDepth(int depth)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(depth)
+                .Operate(NewImageEffect.OperateMode.Delete)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect ChangeByDepth(int depth, string sprite)
+        {
+            return SetSpriteByDepth(depth, sprite);
         }
 
         public static NewImageEffect TransBackSprite(float time)
@@ -309,61 +293,35 @@ namespace Assets.Script.Framework.Effect
         }
         #endregion
 
-
         public static NewImageEffect SetLive2dSpriteByDepth(int depth, string modelName)
         {
             NewEffectBuilder builder = new NewEffectBuilder();
             NewImageEffect e = builder.UI(depth)
                 .Source(modelName)
-                .Operate(NewImageEffect.OperateMode.SetLive2D)
+                .Operate(NewImageEffect.OperateMode.Live2d)
+                .Live2d(NewImageEffect.Live2dMode.SetLive2D)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect ChangeLive2dExpression(int depth, int expre)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(depth)
+                .Frequency(expre)
+                .Operate(NewImageEffect.OperateMode.Live2d)
+                .Live2d(NewImageEffect.Live2dMode.ChangeExpression)
                 .Get();
             return e;
         }
 
 
-        #region 前景图操作
-        public static NewImageEffect SetSpriteByDepth(int depth, string sprite)
+        #region Trans类
+        public static NewImageEffect PreTransByDepth(int depth)
         {
             NewEffectBuilder builder = new NewEffectBuilder();
             NewImageEffect e = builder.UI(depth)
-                .Source(sprite)
-                .Operate(NewImageEffect.OperateMode.SetSprite)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect DeleteSpriteByDepth(int depth)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(depth)
-                .Operate(NewImageEffect.OperateMode.Delete)
-                .Get();
-                return e;
-        }
-
-        public static NewImageEffect ChangeByDepth(int depth, string sprite)
-        {
-            return SetSpriteByDepth(depth, sprite);
-        }
-
-        public static NewImageEffect FadeInByDepth(int depth, float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(depth)
-                .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.Fade)
-                .FinalAlpha(1)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect FadeOutByDepth(int depth, float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(depth)
-                .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.Fade)
-                .FinalAlpha(0)
+                .Operate(NewImageEffect.OperateMode.PreTrans)
                 .Get();
             return e;
         }
@@ -400,32 +358,219 @@ namespace Assets.Script.Framework.Effect
             return e;
         }
 
-        public static NewImageEffect SetPostionByDepth(int depth, Vector3 position)
+        public static NewImageEffect RotateFade(string sprite, bool inverse, float time)
         {
             NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(depth)
-                .Operate(NewImageEffect.OperateMode.SetPos)
-                .FinalPosition(position)
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Source(sprite)
+                .TotalTime(time)
+                .Direction(inverse)
+                .Operate(NewImageEffect.OperateMode.Trans)
+                .Trans(NewImageEffect.TransMode.RotateFade)
                 .Get();
             return e;
         }
 
-        public static NewImageEffect SetDefaultPostionByDepth(int depth, string pstr)
+        public static NewImageEffect SideFade(string sprite, string direction, float time)
         {
             NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(depth)
-                .Operate(NewImageEffect.OperateMode.SetPos)
-                .FinalPosition(pstr)
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Source(sprite)
+                .TotalTime(time)
+                .Direction(direction)
+                .Operate(NewImageEffect.OperateMode.Trans)
+                .Trans(NewImageEffect.TransMode.SideFade)
                 .Get();
             return e;
         }
 
-        public static NewImageEffect MoveByDepth(int depth, Vector3 final, float time)
+        public static NewImageEffect Circle(string sprite, bool inverse, float time)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Source(sprite)
+                .TotalTime(time)
+                .Direction(inverse)
+                .Operate(NewImageEffect.OperateMode.Trans)
+                .Trans(NewImageEffect.TransMode.Circle)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect Scroll(string sprite, string direction, float time)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Source(sprite)
+                .TotalTime(time)
+                .Direction(direction)
+                .Operate(NewImageEffect.OperateMode.Trans)
+                .Trans(NewImageEffect.TransMode.Scroll)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect ScrollBoth(string sprite, string direction, float time)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Source(sprite)
+                .TotalTime(time)
+                .Direction(direction)
+                .Operate(NewImageEffect.OperateMode.Trans)
+                .Trans(NewImageEffect.TransMode.ScrollBoth)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect Universial(string sprite, string rule, float time)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Source(sprite)
+                .TotalTime(time)
+                .Operate(NewImageEffect.OperateMode.Trans)
+                .Trans(NewImageEffect.TransMode.Universial)
+                .Mask(rule)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect Shutter(string sprite, string direction, float time)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Source(sprite)
+                .TotalTime(time)
+                .Operate(NewImageEffect.OperateMode.Trans)
+                .Trans(NewImageEffect.TransMode.Shutter)
+                .Direction(direction)
+                .Get();
+            return e;
+        }
+
+        #endregion
+
+        #region Effect类
+        public static NewImageEffect Masking(string mask)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Operate(NewImageEffect.OperateMode.Effect)
+                .Effect(NewImageEffect.EffectMode.Mask)
+                .Mask(mask)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect Blur()
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Operate(NewImageEffect.OperateMode.Effect)
+                .Effect(NewImageEffect.EffectMode.Blur)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect Mosaic()
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Operate(NewImageEffect.OperateMode.Effect)
+                .Effect(NewImageEffect.EffectMode.Mosaic)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect Gray()
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Operate(NewImageEffect.OperateMode.Effect)
+                .Effect(NewImageEffect.EffectMode.Gray)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect OldPhoto()
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.Back)
+                .Operate(NewImageEffect.OperateMode.Effect)
+                .Effect(NewImageEffect.EffectMode.OldPhoto)
+                .Get();
+            return e;
+        }
+        #endregion
+
+
+        #region Action类
+        public static NewImageEffect FadeInBackSprite(float time)
+        {
+            return FadeToByDepth(-1, 1, time);
+        }
+
+        public static NewImageEffect FadeOutBackSprite(float time)
+        {
+            return FadeToByDepth(-1, 0, time);
+        }
+
+        public static NewImageEffect FadeInByDepth(int depth, float time)
+        {
+            return FadeToByDepth(depth, 1, time);
+        }
+
+        public static NewImageEffect FadeOutByDepth(int depth, float time)
+        {
+            return FadeToByDepth(depth, 0, time);
+        }
+
+
+        public static NewImageEffect FadeToByDepth(int depth, float alpha, float time)
         {
             NewEffectBuilder builder = new NewEffectBuilder();
             NewImageEffect e = builder.UI(depth)
                 .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.Move)
+                .Operate(NewImageEffect.OperateMode.Action)
+                .Action(NewImageEffect.ActionMode.Fade)
+                .FinalAlpha(alpha)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect ScaleToByDepth(int depth, Vector3 scale, float time)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(depth)
+                .TotalTime(time)
+                .Operate(NewImageEffect.OperateMode.Action)
+                .Action(NewImageEffect.ActionMode.Scale)
+                .Scale(scale)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect RotateToByDepth(int depth, Vector3 angle, float time)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(depth)
+                .TotalTime(time)
+                .Operate(NewImageEffect.OperateMode.Action)
+                .Action(NewImageEffect.ActionMode.Rotate)
+                .Rotate(angle)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect MoveByDepth(int depth, Vector3 final, float time, bool sync)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(depth)
+                .TotalTime(time)
+                .Sync(sync)
+                .Operate(NewImageEffect.OperateMode.Action)
+                .Action(NewImageEffect.ActionMode.Move)
                 .FinalPosition(final)
                 .Get();
             return e;
@@ -436,29 +581,19 @@ namespace Assets.Script.Framework.Effect
             NewEffectBuilder builder = new NewEffectBuilder();
             NewImageEffect e = builder.UI(depth)
                 .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.Move)
+                .Operate(NewImageEffect.OperateMode.Action)
+                .Action(NewImageEffect.ActionMode.Move)
                 .FinalPosition(pstr)
                 .Get();
             return e;
         }
-
-        public static NewImageEffect SetAlphaByDepth(int depth, float alpha)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(depth)
-                .Operate(NewImageEffect.OperateMode.SetAlpha)
-                .FinalAlpha(alpha)
-                .Get();
-            return e;
-        }
-        #endregion
-
         public static NewImageEffect SpriteShakeByDepth(int depth, float v, int freq, float time)
         {
             NewEffectBuilder builder = new NewEffectBuilder();
             NewImageEffect e = builder.UI(depth)
                 .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.Shake)
+                .Operate(NewImageEffect.OperateMode.Action)
+                .Action(NewImageEffect.ActionMode.Shake)
                 .Variation(v)
                 .Frequency(freq)
                 .Get();
@@ -470,19 +605,46 @@ namespace Assets.Script.Framework.Effect
             NewEffectBuilder builder = new NewEffectBuilder();
             NewImageEffect e = builder.UI(NewImageEffect.ImageType.All)
                 .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.WinShake)
+                .Operate(NewImageEffect.OperateMode.Action)
+                .Action(NewImageEffect.ActionMode.WinShake)
                 .Variation(v)
                 .Frequency(freq)
                 .Get();
             return e;
         }
+        # endregion
 
         public static NewImageEffect FadeOutAll(float time)
         {
             NewEffectBuilder builder = new NewEffectBuilder();
             NewImageEffect e = builder.UI(NewImageEffect.ImageType.All)
                 .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.Fade)
+                .Operate(NewImageEffect.OperateMode.Action)
+                .Action(NewImageEffect.ActionMode.Fade)
+                .FinalAlpha(0)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect FadeOutAllChara(float time)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.AllChara)
+                .TotalTime(time)
+                .Operate(NewImageEffect.OperateMode.Action)
+                .Action(NewImageEffect.ActionMode.Fade)
+                .FinalAlpha(0)
+                .Get();
+            return e;
+        }
+
+        public static NewImageEffect FadeOutAllPic(float time)
+        {
+            NewEffectBuilder builder = new NewEffectBuilder();
+            NewImageEffect e = builder.UI(NewImageEffect.ImageType.AllPic)
+                .TotalTime(time)
+                .Operate(NewImageEffect.OperateMode.Action)
+                .Action(NewImageEffect.ActionMode.Fade)
                 .FinalAlpha(0)
                 .Get();
             return e;
@@ -497,33 +659,11 @@ namespace Assets.Script.Framework.Effect
             return e;
         }
 
-        public static NewImageEffect FadeOutAllChara(float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.AllChara)
-                .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.Fade)
-                .FinalAlpha(0)
-                .Get();
-            return e;
-        }
-
         public static NewImageEffect RemoveAllChara()
         {
             NewEffectBuilder builder = new NewEffectBuilder();
             NewImageEffect e = builder.UI(NewImageEffect.ImageType.AllChara)
                 .Operate(NewImageEffect.OperateMode.Delete)
-                .Get();
-            return e;
-        }
-
-        public static NewImageEffect FadeOutAllPic(float time)
-        {
-            NewEffectBuilder builder = new NewEffectBuilder();
-            NewImageEffect e = builder.UI(NewImageEffect.ImageType.AllPic)
-                .TotalTime(time)
-                .Operate(NewImageEffect.OperateMode.Fade)
-                .FinalAlpha(0)
                 .Get();
             return e;
         }

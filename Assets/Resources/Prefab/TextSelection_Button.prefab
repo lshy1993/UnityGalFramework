@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6975510483799510104}
   - component: {fileID: 9185129516000978285}
+  - component: {fileID: 6161324948244134185}
   - component: {fileID: 5628914583814844074}
   - component: {fileID: 1939959989696694761}
   m_Layer: 5
@@ -47,6 +48,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3130752533359304668}
   m_CullTransparentMesh: 0
+--- !u!225 &6161324948244134185
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3130752533359304668}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!114 &5628914583814844074
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -118,7 +131,12 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  onHover:
+  onHoverEnter:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  onHoverLeave:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,

@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace Assets.Script.Scenario
 {
-    public class avg00 : TextScript
+    public class demo1 : TextScript
     {
-        public avg00(DataManager manager, GameObject root, PanelSwitch ps) : base(manager, root, ps) { }
+        public demo1(DataManager manager, GameObject root, PanelSwitch ps) : base(manager, root, ps) { }
         public override void InitText()
         {
             pieces = new List<Piece>()
@@ -19,19 +19,23 @@ namespace Assets.Script.Scenario
                 //——背景 后排视角教室——
                 f.FadeinBackground("bg cloud up"),
                 f.OpenDialog(),
-                f.FadeInCharacterSprite(0,"ming/n-01"),
+                f.FadeinCharacterSprite(0,"ming/n-01"),
                 f.t("喵星人", "呼——终于忙完了喵！"),
                 f.t("李云萧", "<color=#66ccff>（将新的教材搬回教室后，我们把课本分发给了每一位同学。）</color>"),
                 f.t("李云萧", "说起来，喵星人，我们的班主任呢？"),
                 f.t("喵星人", "工作做完了，估计已经回家去了。"),
                 f.t("李云萧", "这么早就回去了！？"),
-                f.TransCharacterSprite(0,"ch3"),
+                f.PreTransCharacterSprite(0),
+                f.SetCharacterSprite(0,"ch3"),
+                f.TransCharacterSprite(0),
                 f.t("？？？", "各位！大家都拿到课本了吗？"),
                 //——CG 苏梦忆讲台演讲——
                 f.t("？？？", "既然大家都回来了，那么……"),
                 f.t("？？？", "现在就开始新一轮的班委竞选。"),
                 f.t("李云萧", "……"),
-                f.TransCharacterSprite(0,"ch4"),
+                f.PreTransCharacterSprite(0),
+                f.SetCharacterSprite(0,"ch4"),
+                f.TransCharacterSprite(0),
                 f.t("喵星人", "在盯着看什么呢？"),
                 f.t("李云萧", "没、没什么……"),
                 f.t("喵星人", "啊~我懂了，原来是班长啊~"),
@@ -39,8 +43,9 @@ namespace Assets.Script.Scenario
                 f.t("喵星人", "喏，站在讲台上讲话的就是了。"),
                 f.MoveCharacterSprite(0,"right",0.2f),
                 //f.PreTransCharacterSprite(0,"ch4","right"),
-                f.PreTransCharacterSprite(1,"ch3","left"),
-                f.TransAll(),
+                f.SetCharacterSprite(1,"ch3","left"),
+                f.FadeinCharacterSprite(1),
+                //f.TransAll(),
                 f.t("？？？", "你是新来的同学吧，你要参与竞选吗？"),
                 f.t("李云萧", "不、不用了吧，我刚来……"),
                 f.t("？？？", "嗯，那好吧。"),
@@ -59,15 +64,15 @@ namespace Assets.Script.Scenario
                 f.t("李云萧", "啊！？不会吧……"),
                 f.FadeoutAllChara(),
                 f.CloseDialog(),
-                f.TransBackground("sky_day"),
+                f.TransBackgroundToImage("sky_day"),
                 f.Wait(0.3f),
                 f.OpenDialog(),
                 f.t("李云萧", "[66ccff]（我并没有心思去听每个人的上台发言……）[-]"),
                 f.t("李云萧", "[66ccff]（夏日的午后总是这么悠闲……）[-]"),
                 f.t("李云萧", "[66ccff]（悠闲得让人不自觉地发起呆来……）[-]"),
                 f.t("喵星人", "李云萧！李云萧！"),
-                f.TransBackground("classroom"),
-                f.FadeInCharacterSprite(0,"ch4"),
+                f.TransBackgroundToImage("classroom"),
+                f.FadeinCharacterSprite(0,"ch4"),
                 f.t("李云萧", "欸？已经结束了？"),
                 f.t("喵星人", "发言早就结束了，现在在投票呢！"),
                 f.t("李云萧", "哦哦。"),
@@ -88,7 +93,7 @@ namespace Assets.Script.Scenario
                 //——背景 校园地图——
                 f.FadeinBackground("school"),
                 //*这里进入地图说明 人物考虑用Q版
-                f.FadeInCharacterSprite(0,"ch4","right"),
+                f.FadeinCharacterSprite(0,"ch4","right"),
                 f.OpenDialog(),
                 f.t("喵星人", "先给你介绍一下我们的校园喵。"),
                 f.t("喵星人", "这就是我们所在的[ff6600]1号教学楼[-]，整个高中部都在这里。"),

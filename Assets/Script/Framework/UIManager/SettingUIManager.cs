@@ -5,6 +5,7 @@ using System.Text;
 
 using Assets.Script.Framework.Data;
 using Assets.Script.Framework.Effect;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,7 +16,8 @@ namespace Assets.Script.Framework.UI
         /// <summary>
         /// 用于控制 和切换旗下的4个设置模块
         /// </summary>
-        //public GameObject graphicCon, soundCon, textCon, sysCon;
+        public GameObject graphicCon, soundCon, textCon, previewCon;
+
         //public GameObject graphicBtn, soundBtn, textBtn, sysBtn;
 
         /// <summary>
@@ -54,6 +56,47 @@ namespace Assets.Script.Framework.UI
             //        SwitchTab("Graphic_Button");
             //        break;
             //}
+            InitCanvas();
+            Open();
+        }
+
+        private void OnDisable()
+        {
+            DataManager.GetInstance().SaveConfigData();
+        }
+
+        private void Open()
+        {
+            AnimationCurve ac = AniCurveManager.GetInstance().Curve84;
+            // 淡入4个
+            GameObject[] goos = new GameObject[4] { graphicCon, textCon, soundCon, previewCon };
+            int[] posY = new int[4] {0,0,0,0 };
+            for (int i = 0; i < 4; i++)
+            {
+                GameObject go = goos[i];
+                int raw = i / 2;
+                int col = i % 2;
+                go.GetComponent<CanvasGroup>()
+                    .DOFade(1, 0.5f)
+                    .SetEase(ac)
+                    .SetDelay(0.03f * col + 0.02f * raw);
+                go.GetComponent<RectTransform>()
+                    .DOAnchorPosY(posY[i], 0.5f)
+                    .SetEase(ac)
+                    .SetDelay(0.03f * col + 0.02f * raw);
+            }
+        }
+
+        private void InitCanvas()
+        {
+            GameObject[] goos = new GameObject[4] { graphicCon, textCon, soundCon, previewCon };
+
+            for (int i = 0; i < 4; i++)
+            {
+                GameObject go = goos[i];
+                go.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -222);
+                go.GetComponent<CanvasGroup>().alpha = 0;
+            }
         }
 
         /// <summary>

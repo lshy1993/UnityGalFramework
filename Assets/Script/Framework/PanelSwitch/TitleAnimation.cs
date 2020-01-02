@@ -4,21 +4,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Assets.Script.Framework.Effect;
+
 using UnityEngine;
+
+using DG.Tweening;
+using UnityEngine.UI;
 
 namespace Assets.Script.Framework.UI
 {
     public class TitleAnimation : PanelAnimation
     {
         /// <summary>
-        /// 中间主按钮
+        /// 文字标题
         /// </summary>
-        private GameObject btnTable;
+        private GameObject titleCon;
+
+        /// <summary>
+        /// 主按钮Panel
+        /// </summary>
+        private GameObject btnCon;
+
+        /// <summary>
+        /// 动态背景层
+        /// </summary>
+        private GameObject videoCon;
+
+        //public TitleVideoEffect tve;
 
         /// <summary>
         /// 底部外链按钮
         /// </summary>
-        //private GameObject subTabel;
+        private GameObject otherCon;
 
         /// <summary>
         /// 侧边标签容器
@@ -30,30 +47,32 @@ namespace Assets.Script.Framework.UI
         /// </summary>
         //private GameObject particleCon;
 
-        private GameObject backSprite, videoSprite;
-        private GameObject titleLabel, titleEngLabel, sideLabel;
+        private Sequence twq;
+
+        //private GameObject backSprite, videoSprite, videoHover;
+        private GameObject titleLabel, subtitleLabel, sideLabel;
 
         public override void Init()
         {
-            //btnTable = this.transform.Find("Title_Container/MainButton_Table").gameObject;
-            btnTable = this.transform.Find("Title_Container").gameObject;
-            //subTabel = this.transform.Find("Title_Container/MainButton_Table").gameObject;
-            //sideLabelCon = this.transform.Find("Title_Container/SideLabel_Container").gameObject;
+            titleCon = transform.Find("Title_Container").gameObject;
+            
+            btnCon = transform.Find("MainButton_Table").gameObject;
+            videoCon = transform.Find("Video_Sprite").gameObject;
             //particleCon = this.transform.Find("Title_Container/Particle_Container").gameObject;
-
-            backSprite = this.transform.Find("Back_Sprite").gameObject;
-            videoSprite = this.transform.Find("Video_Sprite").gameObject;
-
-            //titleLabel = this.transform.Find("Title_Container/TitleText_Label").gameObject;
-            //titleEngLabel = this.transform.Find("Title_Container/TitleTextEng_Label").gameObject;
-            //sideLabel = this.transform.Find("Title_Container/SideTextEng_Label").gameObject;
+            
+            //sideLabelCon = this.transform.Find("SideLabel_Container").gameObject;
+            otherCon = transform.Find("Other_Container").gameObject;
+            
+            // 子部件
+            titleLabel = titleCon.transform.Find("Title_Label").gameObject;
+            subtitleLabel = titleCon.transform.Find("SubTitle_Label").gameObject;
+            //sideLabel = sideLabelCon.transform.Find("SideTex_Label").gameObject;
 
             base.Init();
         }
 
         public override void BeforeClose()
         {
-            //base.BeforeClose();
             BlockBtn(false);
         }
 
@@ -62,88 +81,136 @@ namespace Assets.Script.Framework.UI
         /// </summary>
         public override IEnumerator CloseSequence(UIAnimationCallback callback)
         {
-            //yield return new WaitForSeconds(1f);
-            //BlockBtn(false);
-            //panel.alpha = 1;
-            //float x = 1;
-            //while (x > 0)
-            //{
-            //    x = Mathf.MoveTowards(x, 0, 1 / closeTime * Time.deltaTime);
-            //    panel.alpha = x;
-            //    Debug.Log(x);
-            //    yield return null;
-            //}
-            //callback();
+            // 飞出按钮
+            AnimationCurve ac = AniCurveManager.GetInstance().Curve84;
+            if(twq != null)
+            {
+                twq.Kill();
+            }
+            twq = DOTween.Sequence();
+            //videoSprite.GetComponent<RectTransform>()
+            //    .DOAnchorPosX(-45f, 0.66f);
+            
+            twq.Append(
+                btnCon.GetComponent<CanvasGroup>()
+                .DOFade(0, 0.5f)
+                .OnStart(() => { btnCon.SetActive(true); })
+            );
 
-            return base.CloseSequence(() => {
+            for (int i = 0; i < btnCon.transform.childCount; i++)
+            {
+                Transform tr = btnCon.transform.GetChild(i);
+                twq.Join(
+                    tr.GetComponent<RectTransform>()
+                    .DOAnchorPosX(280, 0.5f)
+                    .SetEase(ac)
+                    .SetDelay(0.05f * i)
+                );
+            }
+            twq.Play();
+            
+            yield return new WaitForSeconds(0.2f);
+
+            yield return base.CloseSequence(() =>
+            {
                 //particleCon.SetActive(false);
+                videoCon.SetActive(false);
                 callback();
             });
         }
-
+ 
         /// <summary>
         /// 自定义进入界面动效
         /// </summary>
         public override IEnumerator OpenSequence(UIAnimationCallback callback)
-        {            
-            InitBtn();
-            BlockBtn(false);
+        {
+            //Debug.Log("Animation Before Open");
+            BlockBtn(true);
             InitLabel();
-            
-            return base.OpenSequence(() =>
+            GetComponent<TitleUIManager>().Init();
+
+            //yield return StartCoroutine(tve.Init());
+
+            yield return base.OpenSequence(() =>
             {
-                StartCoroutine(ShowText());
+                StartCoroutine(EnterAnimation());
                 callback();
             });
         }
 
-        //文字显示动画
-        private IEnumerator ShowText()
+        private IEnumerator EnterAnimation()
         {
-            //sideLabelCon.SetActive(true);
-            float x = 0;
-            while (x < 1)
-            {
-                x = Mathf.MoveTowards(x, 1, 1 / 0.2f * Time.deltaTime);
-                //titleLabel.GetComponent<UIRect>().alpha = x;
-                yield return null;
-            }
-            StartCoroutine(ShowParticle());
-            x = 0;
-            while (x < 1)
-            {
-                x = Mathf.MoveTowards(x, 1, 1 / 0.2f * Time.deltaTime);
-                //titleEngLabel.GetComponent<UIRect>().alpha = x;
-                //sideLabel.GetComponent<UIRect>().alpha = x;
-                yield return null;
-            }
+            StartCoroutine(ShowTitleText());
             StartCoroutine(ShowBtn());
+            yield return StartCoroutine(ShowOther());
+        }
+
+        //文字显示动画
+        private IEnumerator ShowTitleText()
+        {
+            AnimationCurve ac = AniCurveManager.GetInstance().Curve84;
+            Sequence sq = DOTween.Sequence();
+            sq.Pause();
+            //sq.Append(titleCon.GetComponent<CanvasGroup>()
+            //        .DOFade(1, 0.5f)
+            //        .OnStart(() =>
+            //        {
+            //            titleCon.GetComponent<CanvasGroup>().alpha = 0;
+            //            titleCon.SetActive(true);
+            //        }));
+            sq.Append(titleLabel.GetComponent<Text>()
+                .DOFade(1, 0.5f)
+                .SetEase(ac));
+            sq.Append(subtitleLabel.GetComponent<Text>()
+                .DOFade(1, 0.5f)
+                .SetEase(ac));
+            sq.Play();
+            yield return sq.WaitForCompletion();
         }
 
         //按钮显示动画
         private IEnumerator ShowBtn()
         {
-            btnTable.GetComponent<CanvasGroup>().alpha = 0;
-            btnTable.SetActive(true);
-            float x = 0;
-            while (x < 1)
+            AnimationCurve ac = AniCurveManager.GetInstance().Curve84;
+            Sequence sq = DOTween.Sequence();
+            sq.Pause();
+            sq.Append(btnCon.GetComponent<CanvasGroup>()
+                    .DOFade(1, 0.5f)
+                    .OnStart(() => {
+                        Debug.Log("anistart");
+                        btnCon.GetComponent<CanvasGroup>().alpha = 0;
+                        btnCon.SetActive(true);
+                    }));
+            for (int i = 0; i < btnCon.transform.childCount; i++)
             {
-                x = Mathf.MoveTowards(x, 1, 1 / 0.3f * Time.fixedDeltaTime);
-                btnTable.GetComponent<CanvasGroup>().alpha = x;
-                yield return null;
+                Transform tr = btnCon.transform.GetChild(i);
+                sq.Join(
+                tr.GetComponent<RectTransform>()
+                    .DOAnchorPosX(0, 0.5f)
+                    .SetEase(ac)
+                    .SetDelay(0.05f * i));
             }
-            //TODO: 按钮飞入
+            sq.onComplete = (() => {
+                BlockBtn(true);
+            });
+            sq.Play();
+            yield return sq.WaitForCompletion();
+        }
 
-            //for (int i = 0; i < btnTable.transform.childCount; i++)
-            //{
-            //    //btnTable.transform.GetChild(i).GetComponent<UIRect>().alpha = 0;
-            //}
-            //for (int i = 0; i < btnTable.transform.childCount; i++)
-            //{
-                
-            //}
-
-            BlockBtn(true);
+        private IEnumerator ShowOther()
+        {
+            AnimationCurve ac = AniCurveManager.GetInstance().Curve84;
+            Sequence sq = DOTween.Sequence();
+            sq.Pause();
+            sq.Append(otherCon.GetComponent<CanvasGroup>()
+                    .DOFade(1, 0.5f)
+                    .OnStart(() =>
+                    {
+                        otherCon.GetComponent<CanvasGroup>().alpha = 0;
+                        otherCon.SetActive(true);
+                    }));
+            sq.Play();
+            yield return sq.WaitForCompletion();
         }
 
         //粒子效果层动画
@@ -161,22 +228,11 @@ namespace Assets.Script.Framework.UI
 
         private void BlockBtn(bool blocked)
         {
-            //for (int i = 0; i < btnTable.transform.childCount; i++)
-            //{
-            //    btnTable.transform.GetChild(i).GetComponent<UIButton>().enabled = blocked;
-            //}
-        }
-
-        /// <summary>
-        /// 初始化按钮状态，透明且关闭
-        /// </summary>
-        private void InitBtn()
-        {
-            //btnTable.SetActive(false);
-            //for (int i = 0; i < btnTable.transform.childCount; i++)
-            //{
-            //    btnTable.transform.GetChild(i).GetComponent<UIRect>().alpha = 0;
-            //}
+            //Debug.Log("block title button" + blocked);
+            for (int i = 0; i < btnCon.transform.childCount; i++)
+            {
+                btnCon.transform.GetChild(i).GetComponent<BasicButton>().enabled = blocked;
+            }
         }
 
         /// <summary>
@@ -184,10 +240,8 @@ namespace Assets.Script.Framework.UI
         /// </summary>
         private void InitLabel()
         {
-            //titleLabel.GetComponent<UIRect>().alpha = 0;
-            //titleEngLabel.GetComponent<UIRect>().alpha = 0;
-            //sideLabel.GetComponent<UIRect>().alpha = 0;
-            //sideLabelCon.SetActive(false);
+            titleLabel.GetComponent<Text>().color = new Color(1,1,1,0);
+            subtitleLabel.GetComponent<Text>().color = new Color(1, 1, 1, 0);
         }
     }
 }

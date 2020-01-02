@@ -36,7 +36,9 @@ namespace Assets.Script.Framework.Node
             f = new PieceFactory(root, manager);
             nodeFactory = NodeFactory.GetInstance();
             InitText();
-            ps.SwitchTo_VerifyIterative("Message_Panel", Update);
+            Debug.Log("TextScript init");
+            ps.SwitchTo_VerifyIterative_WithOpenCallback("Message_Panel", Update);
+            //ps.SwitchTo_VerifyIterative("Message_Panel", Update);
         }
 
         public abstract void InitText();
@@ -45,7 +47,7 @@ namespace Assets.Script.Framework.Node
         {
             if (manager.isEffecting)
             {
-                //Debug.Log("Effects Running Throw Click Event!");
+                Debug.Log("Effects Running, Ignore Piece Update Event!");
                 return;
             }
             if (pieces != null && current >= 0 && current < pieces.Count)
@@ -55,7 +57,8 @@ namespace Assets.Script.Framework.Node
                     //图像效果处理块
                     manager.isEffecting = true;
                     EffectPiece ep = (EffectPiece)pieces[current];
-                    ep.ExecAuto(new Action(() => { manager.isEffecting = false; current = ep.Next(); Update(); }));
+                    ep.ExecAuto(new Action(() => {
+                        manager.isEffecting = false; current = ep.Next(); Update(); }));
                 }
                 else if ( pieces[current].GetType() == typeof(SoundPiece))
                 {
@@ -153,6 +156,7 @@ namespace Assets.Script.Framework.Node
             }
             else
             {
+                //Debug.Log(string.Format("Piece:{0}/{1}", current, pieces.Count()));
                 end = true;
             }
 

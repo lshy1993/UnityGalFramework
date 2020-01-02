@@ -8,6 +8,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 
+using DG.Tweening;
+
 //using LitJson;
 
 namespace Assets.Script.Framework.UI
@@ -137,7 +139,8 @@ namespace Assets.Script.Framework.UI
         {
             //hintCon.SetActive(false);
             countCon.SetActive(false);
-            StartCoroutine(ShowBack());
+            //StartCoroutine(ShowBack());
+            InitSelectPos();
         }
 
         /// <summary>
@@ -154,6 +157,10 @@ namespace Assets.Script.Framework.UI
             {
                 Destroy(listCon.transform.GetChild(i).gameObject);
             }
+            
+            Sequence sq = DOTween.Sequence();
+            sq.Append(listCon.GetComponent<CanvasGroup>().DOFade(1, 0.2f));
+            sq.Pause();
             for (int i = 1; i <= n; i++)
             {
                 //生成选项按钮
@@ -162,8 +169,10 @@ namespace Assets.Script.Framework.UI
                 go.transform.SetParent(listCon.transform, false);
                 go.transform.localPosition = new Vector3(0, 400 - (i * d + i * 80));
                 go.transform.Find("Text").GetComponent<Text>().text = currentSelect.select[i - 1];
+                go.GetComponent<CanvasGroup>().alpha = 0;
                 go.GetComponent<SelectButton>().SetUIManager(this);
                 go.GetComponent<SelectButton>().SetID(i);
+                sq.Join(go.GetComponent<CanvasGroup>().DOFade(1, 0.5f).SetDelay(0.02f * i));
                 //百分比统计
                 //go = Resources.Load("Prefab/SelectionRate_Label") as GameObject;
                 //go = NGUITools.AddChild(hintCon, go);
@@ -171,6 +180,7 @@ namespace Assets.Script.Framework.UI
                 //go.GetComponent<UILabel>().text = "??";
             }
             listCon.SetActive(true);
+            sq.Play();
             CountDown();
         }
 
@@ -254,13 +264,13 @@ namespace Assets.Script.Framework.UI
             listCon.SetActive(true);
             //动画循环
             float t = 0;
-            int y = 0;
+            //int y = 0;
+            //y = (int)(t * 720);
+            //listCon.GetComponent<Image>().height = y;
             while (t < 1)
             {
                 t = Mathf.MoveTowards(t, 1, 1 / 0.2f * Time.deltaTime);
-                y = (int)(t * 720);
                 listCon.GetComponent<CanvasGroup>().alpha = t;
-                //listCon.GetComponent<Image>().height = y;
                 yield return null;
             }
 

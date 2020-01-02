@@ -21,6 +21,12 @@ namespace Assets.Script.Framework.UI
         /// </summary>
         public Slider bgmSlider, seSlider, voiceSlider, sysSeSlider;
         //public GameObject volumeSlider;
+
+        public GameObject bgmMuteBtn, seMuteBtn, voiceMuteBtn;
+
+        private bool bgmMuted, seMuted, voiceMuted;
+        private float bgmValue, seValue, voiceValue;
+
         //private int defaultNum;
 
         private void OnEnable()
@@ -38,13 +44,13 @@ namespace Assets.Script.Framework.UI
 
         private void SetRadioPressed(GameObject target)
         {
+            target.GetComponent<BasicButton>().enabled = false;
             target.GetComponent<Image>().sprite = null;//target.GetComponent<Button>().hoverSprite2D;
-            target.GetComponent<Button>().enabled = false;
         }
         private void SetRadioAvailable(GameObject target)
         {
+            target.GetComponent<BasicButton>().enabled = true;
             target.GetComponent<Image>().sprite = Resources.Load<Sprite>("UI/fun_back");
-            target.GetComponent<Button>().enabled = true;
         }
 
         /// <summary>
@@ -53,8 +59,9 @@ namespace Assets.Script.Framework.UI
         /// <param name="target"></param>
         private void SetTogglePressed(GameObject target)
         {
-            target.GetComponent<Button>().enabled = false;
-            target.GetComponent<Image>().sprite = Resources.Load<Sprite>("UI/switch_on");
+            target.transform.Find("Hover").gameObject.SetActive(true);
+            //target.GetComponent<BasicButton>().enabled = false;
+            //target.GetComponent<Image>().sprite = Resources.Load<Sprite>("UI/mute_o");
         }
 
         /// <summary>
@@ -63,8 +70,9 @@ namespace Assets.Script.Framework.UI
         /// <param name="target"></param>
         private void SetToggleAvailable(GameObject target)
         {
-            target.GetComponent<Button>().enabled = true;
-            target.GetComponent<Image>().sprite = Resources.Load<Sprite>("UI/switch");
+            target.transform.Find("Hover").gameObject.SetActive(false);
+            //target.GetComponent<BasicButton>().enabled = true;
+            //target.GetComponent<Image>().sprite = Resources.Load<Sprite>("UI/mute");
         }
 
         private void SetCharaButton(int x)
@@ -125,6 +133,55 @@ namespace Assets.Script.Framework.UI
         public void SetVolume(float volume)
         {
             //DataManager.GetInstance().configData.charaVoiceVolume[defaultNum] = volume;
+        }
+
+        public void MuteBGM()
+        {
+            bgmMuted = !bgmMuted;
+            if (bgmMuted)
+            {
+                bgmValue = bgmSlider.value;
+                bgmSlider.value = 0;
+                SetToggleAvailable(bgmMuteBtn);
+            }
+            else
+            {
+                bgmSlider.value = bgmValue;
+                SetTogglePressed(bgmMuteBtn);
+            }
+        }
+
+        public void MuteSE()
+        {
+            seMuted = !seMuted;
+            if (seMuted)
+            {
+                seValue = seSlider.value;
+                seSlider.value = 0;
+                SetTogglePressed(seMuteBtn);
+                
+            }
+            else
+            {
+                seSlider.value = seValue;
+                SetToggleAvailable(seMuteBtn);
+            }
+        }
+
+        public void MuteVoice()
+        {
+            voiceMuted = !voiceMuted;
+            if (bgmMuted)
+            {
+                voiceValue = voiceSlider.value;
+                voiceSlider.value = 0;
+                SetTogglePressed(voiceMuteBtn);
+            }
+            else
+            {
+                voiceSlider.value = voiceValue;
+                SetToggleAvailable(voiceMuteBtn);
+            }
         }
     }
 }

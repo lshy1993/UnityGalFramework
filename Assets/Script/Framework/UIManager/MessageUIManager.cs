@@ -15,7 +15,7 @@ using UnityEngine.UI;
 
 namespace Assets.Script.Framework
 {
-    public class DialogBoxUIManager : MonoBehaviour
+    public class MessageUIManager : MonoBehaviour
     {
         //[HideInInspector]
         public GameObject mainContainer, clickContainer;
@@ -23,27 +23,35 @@ namespace Assets.Script.Framework
         private Text nameLabel;
         private TypeWriter te;
 
-        private GameObject nextIcon;
+        private GameObject nameBox, nextIcon;
         private Toggle toggleAuto;
         private Image avatarSprite;
 
         // 玩家自定义后的姓名
-        private string xing, ming;
+        private string xing {
+            get { return DataManager.GetInstance().gameData.heroXing; }
+        }
+        private string ming {
+            get { return DataManager.GetInstance().gameData.heroMing; }
+        }
 
         private TextPiece currentPiece;
 
+        [SerializeField]
         private bool typewriting = false;
         [SerializeField]
         private bool closedbox = false;
 
-        private Regex rx = new Regex(@"\[[^\]]+\]");
+        public bool showCursor;
 
         void Awake()
         {
             dialogLabel = mainContainer.transform.Find("Dialog_Panel/Content_Text").GetComponent<Text>();
-            nameLabel = mainContainer.transform.Find("Dialog_Panel/Name_Text").GetComponent<Text>();
+            nameBox = mainContainer.transform.Find("Dialog_Panel/Name_Image").gameObject;
+            nameLabel = nameBox.transform.Find("Name_Text").GetComponent<Text>();
 
             nextIcon = dialogLabel.transform.Find("NextIcon_Image").gameObject;
+            nextIcon.SetActive(showCursor);
 
             te = dialogLabel.transform.GetComponent<TypeWriter>();
             te.enabled = false;
@@ -51,40 +59,41 @@ namespace Assets.Script.Framework
             toggleAuto = mainContainer.transform.Find("QuickButton_Panel/Auto_Toggle").GetComponent<Toggle>();
 
             avatarSprite = mainContainer.transform.Find("Avatar_Panel/Avatar_Image").GetComponent<Image>();
-
-            //SetHeroName();
         }
-
-        //public void SetHeroName()
-        //{
-        //    xing = DataManager.GetInstance().gameData.heroXing;
-        //    ming = DataManager.GetInstance().gameData.heroMing;
-        //}
 
         //将文字数据应用到UI上
         public void SetText(TextPiece currentPiece, string name, string dialog, string voice, string avatar = "")
         {
-            //设置成禁用右键和滚轮？
+            // 设置成禁用右键和滚轮？
             DataManager.GetInstance().BlockRightClick();
             DataManager.GetInstance().BlockWheel();
             this.currentPiece = currentPiece;
-            //添加颜色
-            //nameLabel.text = AddColor(name);
-            //替换已读文本
+            // 人物名称
+            if (!string.IsNullOrEmpty(name))
+            {
+                nameBox.SetActive(true);
+                //nameLabel.text = AddColor(name);//添加颜色
+                nameLabel.text = name;
+            }
+            else
+            {
+                nameLabel.text = string.Empty;
+                nameBox.SetActive(false);
+            }
+            
+            // 替换已读文本
             dialogLabel.text = ChangeName(dialog);
-            float a = DataManager.GetInstance().IsTextRead(currentPiece) ? 0.5f : 1f;
+            // TODO: 设定已读样式 和 不同角色不同文字
+            float a = DataManager.GetInstance().IsTextRead() ? 0.8f : 1f;
             float r = dialogLabel.color.r;
             float g = dialogLabel.color.g;
             float b = dialogLabel.color.b;
             dialogLabel.color = new Color(r, g, b, a);
-            //打字机
+            // 打字机
             te.enabled = true;
             te.ResetToBeginning();
             typewriting = true;
-
-            //去掉颜色标签符号
-            DataManager.GetInstance().tempData.currentText = rx.Replace(dialogLabel.text, "");
-            //头像
+            // 头像
             SetAvatar(avatar);
         }
 
@@ -132,7 +141,7 @@ namespace Assets.Script.Framework
                 //toggleAuto.CancelAuto();
                 return;
             }
-            Close(0.1f, () => { 
+            Close(0.2f, () => { 
                 clickContainer.SetActive(true);
             });
             mainContainer.SetActive(false);
@@ -143,6 +152,13 @@ namespace Assets.Script.Framework
         {
             if (!gameObject.activeSelf) return;
             StartCoroutine(OpenUI(0.1f, () => { }));
+            mainContainer.SetActive(true);
+            closedbox = false;
+        }
+
+        public void ShowWindow(Action callback)
+        {
+            StartCoroutine(OpenUI(0.1f, callback));
             mainContainer.SetActive(true);
             closedbox = false;
         }
@@ -158,6 +174,7 @@ namespace Assets.Script.Framework
         {
             HideNextIcon();
             nameLabel.text = "";
+            nameBox.SetActive(false);
             dialogLabel.text = "";
             avatarSprite.sprite = null;
         }
@@ -170,18 +187,15 @@ namespace Assets.Script.Framework
             DataManager.GetInstance().UnblockRightClick();
             DataManager.GetInstance().UnblockWheel();
             typewriting = false;
-            //最后一个文字定位
-            Vector3 vec = GetLastCharacterPos(dialogLabel.gameObject);
-            //Debug.Log(vec);
-            //nextIcon.GetComponent<TweenPosition>();
-            DOTween.Kill(nextIcon.GetComponent<RectTransform>());
-            nextIcon.GetComponent<RectTransform>().anchoredPosition = new Vector3(vec.x + 12, vec.y - 2);
-            Tween tw = nextIcon.GetComponent<RectTransform>().DOAnchorPosY(vec.y + 2, 0.25f);
-            tw.SetLoops(-1, LoopType.Yoyo);
-            nextIcon.SetActive(true);
+            SetCursor();
             if (currentPiece != null) currentPiece.finish = true;
         }
 
+        /// <summary>
+        /// 计算文字最后的位置
+        /// </summary>
+        /// <param name="go"></param>
+        /// <returns></returns>
         private Vector3 GetLastCharacterPos(GameObject go)
         {
             Text label = go.GetComponent<Text>();
@@ -192,7 +206,7 @@ namespace Assets.Script.Framework
             RectTransform transform = label.GetComponent<RectTransform>();
             float offx = 0;//trasform.offsetMin.x;
             float offy = 0;// transform.offsetMax.y;
-            Debug.Log(offx + " " + offy);
+            //Debug.Log(offx + " " + offy);
 
             for (int i = 0; i < text.Length; i++)
             {
@@ -208,10 +222,33 @@ namespace Assets.Script.Framework
                     CharacterInfo charInfo;
                     label.font.GetCharacterInfo(ch, out charInfo, label.fontSize);
                     x += charInfo.advance;
+                    if (x > 1220)
+                    {
+                        y += fullSize + label.lineSpacing;
+                        x = charInfo.advance;
+                    }
                 }
+                
+
             }
 
             return new Vector3(offx + x, offy - y, 0);
+        }
+
+        /// <summary>
+        /// 设置换页光标
+        /// </summary>
+        private void SetCursor()
+        {
+            //获取最后一个文字定位
+            Vector3 vec = GetLastCharacterPos(dialogLabel.gameObject);
+            //Debug.Log(vec);
+            nextIcon.GetComponent<TweenPosition>();
+            DOTween.Kill(nextIcon.GetComponent<RectTransform>());
+            nextIcon.GetComponent<RectTransform>().anchoredPosition = new Vector3(vec.x + 12, vec.y - 2);
+            Tween tw = nextIcon.GetComponent<RectTransform>().DOAnchorPosY(vec.y + 2, 0.25f);
+            tw.SetLoops(-1, LoopType.Yoyo);
+            nextIcon.SetActive(true);
         }
 
         //public 属性获取方法
@@ -229,7 +266,20 @@ namespace Assets.Script.Framework
         {
             ClearText();
             closedbox = false;
-            StartCoroutine(OpenUI(time, callback));
+            //StartCoroutine(OpenUI(time, callback));
+            mainContainer.GetComponent<CanvasGroup>()
+                .DOFade(1, time)
+                .OnStart(() => {
+                    DataManager.GetInstance().isEffecting = true;
+                    mainContainer.SetActive(true);
+                })
+                .OnComplete(() =>
+                {
+                    DataManager.GetInstance().isEffecting = false;
+                    clickContainer.SetActive(true);
+                    callback();
+                });
+            
         }
 
         /// <summary>
@@ -239,7 +289,19 @@ namespace Assets.Script.Framework
         /// <param name="callback"></param>
         public void Close(float time, Action callback)
         {
-            StartCoroutine(CloseUI(time, callback));
+            //StartCoroutine(CloseUI(time, callback));
+            mainContainer.GetComponent<CanvasGroup>()
+                .DOFade(0, time)
+                .OnStart(() => {
+                    DataManager.GetInstance().isEffecting = true;
+                    clickContainer.SetActive(false);
+                })
+                .OnComplete(() =>
+                {
+                    DataManager.GetInstance().isEffecting = false;
+                    mainContainer.SetActive(false);
+                    callback();
+                });
         }
 
         /// <summary>
@@ -248,28 +310,6 @@ namespace Assets.Script.Framework
         private string ChangeName(string origin)
         {
             return origin.Replace("李云萧", xing + ming);
-        }
-
-        private string AddColor(string name)
-        {
-            if (name.Contains("李云萧"))
-            {
-                //return "[33ff00]李[-]  云萧";
-                return "[33ff00]" + xing + "[-]  " + ming;
-            }
-            if (name.Contains("喵星人"))
-            {
-                return "喵  [ffcc33]星[-]人";
-            }
-            if (name.Contains("西门吹"))
-            {
-                return "西门  [0099ff]吹[-]";
-            }
-            if (name.Contains("苏梦忆"))
-            {
-                return "苏  [ff3399]梦[-]忆";
-            }
-            return name;
         }
 
         private IEnumerator OpenUI(float time, Action callback)
@@ -283,6 +323,7 @@ namespace Assets.Script.Framework
                 mainContainer.GetComponent<CanvasGroup>().alpha = t;
                 yield return null;
             }
+            Debug.Log("dialog window show");
             DataManager.GetInstance().isEffecting = false;
             clickContainer.SetActive(true);
             callback();

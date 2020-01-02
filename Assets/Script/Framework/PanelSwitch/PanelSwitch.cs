@@ -30,21 +30,22 @@ namespace Assets.Script.Framework.UI
         /// 存储面板名称
         /// </summary>
         public readonly List<string> PANEL_NAMES = new List<string>()
-    {
-        "Avg",
-        "Title",
-        "System"
-        //"Map",
-        //"Edu",
-        //"Exam",
-        //"Shop",
-        //"Phone",
-        //"Fin",
-        //"Hardness"
-    };
+        {
+            "Logo",
+            "Avg",
+            "Title",
+            "System"
+            //"Map",
+            //"Edu",
+            //"Exam",
+            //"Shop",
+            //"Phone",
+            //"Fin",
+            //"Hardness"
+        };
 
         Dictionary<string, GameObject> panels;
-        private string current;
+        //private string current;
         //记录当前已开启的面板
         private List<string> currentPanelPath
         {
@@ -66,17 +67,17 @@ namespace Assets.Script.Framework.UI
         public void SwitchTo_IdeaVerify(string next)
         {
             // TODO 想办法直接获取相应的符合接口的component
-            PanelTreeInterface currentFade = panels[current].GetComponent<PanelTreeInterface>(),
-                nextFade = panels[next].GetComponent<PanelTreeInterface>();
+            //PanelTreeInterface currentFade = panels[current].GetComponent<PanelTreeInterface>(),
+            //    nextFade = panels[next].GetComponent<PanelTreeInterface>();
 
-            panels[current].GetComponent<CanvasGroup>().alpha = 1;
-            currentFade.Close(() =>
-            {
-                panels[current].SetActive(false);
-                panels[next].GetComponent<CanvasGroup>().alpha = 0;
-                panels[next].SetActive(true);
-                nextFade.Open();
-            });
+            //panels[current].GetComponent<CanvasGroup>().alpha = 1;
+            //currentFade.Close(() =>
+            //{
+            //    panels[current].SetActive(false);
+            //    panels[next].GetComponent<CanvasGroup>().alpha = 0;
+            //    panels[next].SetActive(true);
+            //    nextFade.Open();
+            //});
         }
 
         public void SwitchTo_VerifyIterative(string next)
@@ -119,7 +120,7 @@ namespace Assets.Script.Framework.UI
             {
                 SetActiveChain(false, closeChain);
                 SetActiveChain(true, openChain); //可能需要设置打开时初始条件
-            closeCallback();
+                closeCallback();
                 OpenChain(new Queue<string>(openChain), openCallback);
             });
         }
@@ -154,7 +155,7 @@ namespace Assets.Script.Framework.UI
             {
                 string close = closeStack.Pop();
                 currentPanelPath.Remove(close);
-                //Debug.Log("path update:" + ConvertToStringPath(currentPanelPath));
+                Debug.Log("path update:" + ConvertToStringPath(currentPanelPath));
                 iterator.satellightTable[close].Close(() =>
                 {
                     CloseChain(closeStack, closeFinishCallback);
@@ -167,6 +168,7 @@ namespace Assets.Script.Framework.UI
         {
             if (openQueue.Count == 0 || openQueue.Peek() == null)
             {
+                Debug.Log("已将所有面板开启");
                 //已将所有面板开启
                 openFinishCallback();
                 return;
@@ -217,10 +219,10 @@ namespace Assets.Script.Framework.UI
                 panels.Add(PANEL_NAMES[i], panelObj);
             }
             //游戏初始界面打开情况
-            current = "Title";
+            //current = "Logo";
             currentPanelPath = new List<string>()
             {
-                "UI Root"
+                "UI Root", "Logo_Panel"
             };
             try
             {
@@ -293,19 +295,22 @@ namespace Assets.Script.Framework.UI
             //预截图
             StartCoroutine(ScreenShot());
         }
+
+
         private IEnumerator ScreenShot()
         {
             // 开始截图
             yield return new WaitForEndOfFrame();
             Texture2D tex = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
             tex.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
-            TextureScale.Bilinear(tex, 540, 303);
+            //TextureScale.Bilinear(tex, 540, 303);
+            TextureScale.Bilinear(tex, 342, 192);
             byte[] imagebytes = tex.EncodeToPNG();
             DataManager.GetInstance().SetTempVar("缩略图", imagebytes);
             Destroy(tex);
             // 隐去dialog
             GameObject diabox = panels["Avg"].transform.Find("Message_Panel").gameObject;
-            diabox.GetComponent<DialogBoxUIManager>().HideWindow();
+            diabox.GetComponent<MessageUIManager>().HideWindow();
             // 打开菜单
             panels["System"].GetComponent<SystemUIManager>().quickOpen = true;
             panels["System"].SetActive(true);
@@ -344,7 +349,7 @@ namespace Assets.Script.Framework.UI
         public void OpenBacklog()
         {
             if (DataManager.GetInstance().isAuto) return;
-            panels["Avg"].transform.Find("Message_Panel").GetComponent<DialogBoxUIManager>().HideWindow();
+            panels["Avg"].transform.Find("Message_Panel").GetComponent<MessageUIManager>().HideWindow();
             panels["System"].GetComponent<SystemUIManager>().quickOpen = true;
             panels["System"].SetActive(true);
             panels["System"].GetComponent<CanvasGroup>().alpha = 1;
@@ -372,79 +377,6 @@ namespace Assets.Script.Framework.UI
                 }
 
             }
-        }
-
-        ///--------------------以下是旧函数----------------------------------
-        /// <summary>
-        /// 切换面板,TODO:可能需要对每个Panel做一个切换特效？
-        /// </summary>
-        /// <param name="panel">切换目标面板</param>
-        /// <param name="fadein">淡入时间，默认0.3s</param>
-        /// <param name="fadeout">淡出时间，默认0.3s</param>
-        public void SwitchTo(string panel, float fadein = 0.3f, float fadeout = 0.3f)
-        {
-            Debug.Log("从：" + current + "切换:" + panel);
-
-            if (panels.ContainsKey(panel))
-            {
-                GameObject currentPanel = panels[current];
-                GameObject nextPanel = panels[panel];
-                //Debug.Log(panel);
-                //nextPanel.SetActive(true);
-                //nextPanel.GetComponent<UIPanel>().alpha = 0;
-                //yield return new WaitForSeconds(1);
-
-                StartCoroutine(Switch(currentPanel, nextPanel, fadein, fadeout));
-                current = panel;
-            }
-            else
-            {
-                Debug.Log("Can't find panel: " + panel);
-            }
-        }
-
-        private IEnumerator Switch(GameObject currentPanel, GameObject nextPanel, float fadein, float fadeout)
-        {
-            PanelFade2 current = currentPanel.GetComponent<PanelFade2>(),
-                       next = nextPanel.GetComponent<PanelFade2>();
-            current.Close(fadeout);
-            yield return new WaitForSeconds(fadeout + 1f);
-            nextPanel.SetActive(true);
-            next.Open(fadein);
-
-        }
-
-        IEnumerator Fadein(float time, GameObject target)
-        {
-            CanvasGroup panel = target.GetComponent<CanvasGroup>();
-            float f = time == 0 ? 1 : 0;
-            panel.alpha = f;
-            target.SetActive(true);
-            while (f < 1f)
-            {
-                f = Mathf.MoveTowards(f, 1f, Time.deltaTime / time);
-                panel.alpha = f;
-                yield return null;
-            }
-        }
-
-        IEnumerator DelaySec(float time, Action action)
-        {
-            yield return new WaitForSeconds(time);
-            action();
-        }
-        IEnumerator Fadeout(float time, GameObject target)
-        {
-            CanvasGroup panel = target.GetComponent<CanvasGroup>();
-            float f = time == 0 ? 0 : 1;
-            panel.alpha = f;
-            while (f > 0)
-            {
-                f = Mathf.MoveTowards(f, 0, Time.deltaTime / time);
-                panel.alpha = f;
-                yield return null;
-            }
-            target.SetActive(false);
         }
 
     }

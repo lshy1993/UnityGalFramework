@@ -26,7 +26,7 @@ namespace Assets.Script.Framework.UI
         public GameObject warningContainer;
         public GameObject saveBtn, loadBtn;
 
-        public DialogBoxUIManager dbum;
+        public MessageUIManager dbum;
         public Text sysHintText;
 
         public string currentContainer;

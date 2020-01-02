@@ -6,6 +6,7 @@ using System.Text;
 
 namespace Assets.Script.Framework.UI
 {
+    [Obsolete]
     public class DialogBoxAnimation : PanelAnimation
     {
         public override void BeforeClose()
@@ -20,7 +21,7 @@ namespace Assets.Script.Framework.UI
                 //transform.Find("Main_Container").gameObject.SetActive(true);
                 if (DataManager.GetInstance().tempData.isDiaboxRecover)
                 {
-                    GetComponent<DialogBoxUIManager>().ShowWindow();
+                    GetComponent<MessageUIManager>().ShowWindow();
                     DataManager.GetInstance().tempData.isDiaboxRecover = false;
                 }
                 //transform.Find("Click_Container").gameObject.SetActive(true);

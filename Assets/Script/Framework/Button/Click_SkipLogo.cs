@@ -24,7 +24,7 @@ namespace Assets.Script.Framework.UI
 
         void Execute()
         {
-            Debug.Log(name + "click!");
+            //Debug.Log(name + "click!");
             uiManager.Skip();
         }
     }

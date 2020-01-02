@@ -104,15 +104,17 @@ namespace Assets.Script.Framework
         public void AddBGM(string fileName, bool loop = true)
         {
             if (string.IsNullOrEmpty(fileName)) return;
+            dm.gameData.BGM = fileName;
             //设置资料
-            playerBGM.ChangeSound(fileName, 0.5f, loop);
+            playerBGM.ChangeSound("BGM", fileName, 0.5f, loop);
         }
 
         public void SetBGM(string fileName, bool loop = true)
         {
             if (string.IsNullOrEmpty(fileName)) return;
+            dm.gameData.BGM = fileName;
             //设置资料
-            playerBGM.ChangeSound("BGM/" + fileName, 0.5f, loop);
+            playerBGM.ChangeSound("BGM", fileName, 0.5f, loop);
         }
         public void PauseBGM()
         {
@@ -130,7 +132,8 @@ namespace Assets.Script.Framework
         public void SetSE(string fileName, bool loop = false)
         {
             if (string.IsNullOrEmpty(fileName)) return;
-            playerSE.ChangeSound("SE/" + fileName, 0, loop);
+            dm.gameData.SE = fileName;
+            playerSE.ChangeSound("SE", fileName, 0, loop);
         }
         public void StopSE()
         {
@@ -142,8 +145,15 @@ namespace Assets.Script.Framework
             if (string.IsNullOrEmpty(fileName)) return;
             //设置资料
             Debug.Log(fileName);
-            playerVoice.ChangeSound("Voice/" + fileName, 0, false);
+            dm.gameData.Voice = fileName;
+            playerVoice.ChangeSound("Voice", fileName, 0);
         }
+        public void SetVoiceWithLive2d(string fileName, GameObject model)
+        {
+            dm.gameData.Voice = fileName;
+            playerVoice.SetSoundToMouth("Voice", fileName, 0, model);
+        }
+
         public void StopVoice()
         {
             playerVoice.Stop();
@@ -156,12 +166,13 @@ namespace Assets.Script.Framework
         {
             if (string.IsNullOrEmpty(fileName)) return;
             //设置资料
-            playerSysSE.ChangeSound("SE/" + fileName, 0f, false);
+            playerSysSE.ChangeSound("SE", fileName, 0f, false);
         }
 
 
         public void RunEffect(SoundEffect effect, Action callback)
         {
+            Debug.Log(effect.ToString());
             //选择操作类型
             switch (effect.operate)
             {
@@ -174,12 +185,12 @@ namespace Assets.Script.Framework
                     callback();
                     break;
                 case SoundEffect.OperateType.Set:
-                    GetPlayer(effect).ChangeSound("BGM/" + effect.clip, effect.time, effect.loop);
+                    GetPlayer(effect).ChangeSound("BGM", effect.clip, effect.time, effect.loop);
                     if (effect.target == SoundEffect.SoundType.BGM)
                     {
                         //显示bgm标题哈希表获取标题
-                        string title = ""; // dm.staticData.bgmTitleList[effect.clip];
-                        sideLabel.ShowBGM(title);
+                        //string title = ""; // dm.staticData.bgmTitleList[effect.clip];
+                        //sideLabel.ShowBGM(title);
                     }
                     callback();
                     break;
@@ -230,7 +241,7 @@ namespace Assets.Script.Framework
             string voiceName = dm.gameData.Voice;
             SetBGM(bgmName);
             SetSE(seName);
-            SetVoice(voiceName);
+            //SetVoice(voiceName);
         }
 
         private IEnumerator Run(SoundEffect effect, Action callback)

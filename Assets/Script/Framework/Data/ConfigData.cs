@@ -41,6 +41,16 @@ namespace Assets.Script.Framework.Data
         public bool topMost;
 
         /// <summary>
+        /// 快捷菜单隐藏
+        /// </summary>
+        public bool autoHide;
+
+        /// <summary>
+        /// 跳过模式
+        /// </summary>
+        public bool skipAll;
+
+        /// <summary>
         /// BGM曲名显示时长
         /// </summary>
         public int BGMTime;
@@ -113,6 +123,8 @@ namespace Assets.Script.Framework.Data
             animateSwitch = true;
             avatarSwitch = true;
             topMost = false;
+            autoHide = false;
+            skipAll = false;
             BGMTime = 3;
             chapterTime = 3;
             textSpeed = 60f;
@@ -122,7 +134,7 @@ namespace Assets.Script.Framework.Data
             masterVolume = 1f;
             userBGMVolume = 0.5f;
             userSEVolume = 0.75f;
-            userSysSEVolume = 0.75f;
+            userSysSEVolume = 0.35f;
             userVoiceVolume = 1f;
             charaVoiceVolume = new float[] { 1, 1, 1, 1, 1, 1 };
             charaVoice = new bool[] { true, true, true, true, true, true };

@@ -3,12 +3,13 @@ Shader "Custom/BlurWater"
     Properties
     {
         _MainTex("Texture", 2D) = "white" {}
-        _Blur("Blur", Range(0,50)) = 0
+        _Blur("Blur", Range(0,50)) = 20
     }
     SubShader
     {
 
         Tags{ "Queue" = "Transparent" }
+		Blend SrcAlpha OneMinusSrcAlpha
 
         GrabPass
         {   
@@ -49,6 +50,7 @@ Shader "Custom/BlurWater"
             fixed4 _GrabTexture_TexelSize;
 
             float _Blur;
+			sampler2D _MainTex;
 
             half4 frag(v2f i) : SV_Target
             {
@@ -61,6 +63,7 @@ Shader "Custom/BlurWater"
                 [loop]
                 for (float x = -blur; x <= blur; x += 1)
                 {
+					
                     float distance_normalized = abs(x / blur);
                     float weight = exp(-0.5 * pow(distance_normalized, 2) * 5.0);
                     weight_total += weight;
@@ -68,7 +71,7 @@ Shader "Custom/BlurWater"
                 }
 
                 col /= weight_total;
-                return col;
+				return col;
             }
             ENDCG
         }
@@ -110,6 +113,7 @@ Shader "Custom/BlurWater"
             sampler2D _GrabTexture;
             fixed4 _GrabTexture_TexelSize;
 
+			sampler2D _MainTex;
             float _Blur;
 
             half4 frag(v2f i) : SV_Target
@@ -130,7 +134,7 @@ Shader "Custom/BlurWater"
                 }
 
                 col /= weight_total;
-                return col;
+				return col;
             }
             ENDCG
         }

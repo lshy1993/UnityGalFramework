@@ -1,8 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 using UnityEditor;
+
+using Live2D.Cubism.Framework;
+using Live2D.Cubism.Framework.MouthMovement;
 
 namespace Assets.Script.Framework
 {
@@ -46,26 +50,20 @@ namespace Assets.Script.Framework
         /// 添加新的音源
         /// </summary>
         /// <param name="fileName"></param>
-        /// <param name="fadeIn"></param>
-        /// <param name="isLoop"></param>
-        public void AddSound(string fileName, float fadeIn, bool isLoop)
+        public GalSound AddSound(string fileName)
         {
             //不存在才添加
             if (!audioObjects.ContainsKey(fileName))
             {
                 GameObject go = Resources.Load("Prefab/GalAudio") as GameObject;
-                //go = NGUITools.AddChild(this.gameObject, go);
                 go = Instantiate(go);
-                go.transform.parent = this.transform;
-                go.transform.localPosition = Vector3.zero;
-                go.transform.localRotation = Quaternion.identity;
-                go.transform.localScale = Vector3.one;
+                go.transform.SetParent(this.transform, false);
                 go.name = fileName;
                 audioObjects.Add(fileName, go);
             }
             //直接获取
-            GalSound gs = audioObjects[fileName].GetComponent<GalSound>();
-            SetSoundData(gs, fileName, fadeIn, isLoop);
+            return audioObjects[fileName].GetComponent<GalSound>();
+            
         }
 
         /// <summary>
@@ -74,7 +72,7 @@ namespace Assets.Script.Framework
         /// <param name="fileName"></param>
         /// <param name="fadeIn"></param>
         /// <param name="isLoop"></param>
-        public void ChangeSound(string fileName, float fadeIn, bool isLoop)
+        public void ChangeSound(string path, string fileName, float fadeIn, bool isLoop = false)
         {
             if (audioObjects.Count > 0)
             {
@@ -82,8 +80,27 @@ namespace Assets.Script.Framework
                 audioObjects[key].GetComponent<GalSound>().EndPlay();
                 //audioObjects.Remove(key);
             }
-            AddSound(fileName, fadeIn, isLoop);
+            GalSound gs = AddSound(fileName);
+            string fullpath = path + "/" + fileName;
+            SetSoundData(gs, fullpath, fadeIn, isLoop);
         }
+
+        public void SetSoundToMouth(string path, string fileName, float fadeIn, GameObject model, bool isLoop = false)
+        {
+            if (audioObjects.Count > 0)
+            {
+                string key = audioObjects.FirstOrDefault().Key;
+                audioObjects[key].GetComponent<GalSound>().EndPlay();
+                //audioObjects.Remove(key);
+                
+            }
+            GalSound gs = AddSound(fileName);
+            string fullpath = path + "/" + fileName;
+            SetSoundData(gs, fullpath, fadeIn, isLoop);
+            Debug.Log("add mouth");
+            CubismAudioMouthInput ap = model.GetComponent<Live2dModel>().model.GetComponent<CubismAudioMouthInput>();
+            ap.AudioInput = gs.currentSource;
+        } 
 
         private void SetSoundData(GalSound gs, string fileName, float fadeIn, bool isLoop)
         {

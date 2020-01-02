@@ -11,6 +11,11 @@ namespace Assets.Script.Framework.Data
     public class SavingInfo
     {
         /// <summary>
+        /// 存档日期
+        /// </summary>
+        public string saveDate;
+
+        /// <summary>
         /// 存档时间
         /// </summary>
         public string saveTime;
@@ -21,7 +26,7 @@ namespace Assets.Script.Framework.Data
         public string gameMode;
 
         /// <summary>
-        /// 存档标签
+        /// 存档自定义标签
         /// </summary>
         public string saveText;
 
@@ -29,6 +34,11 @@ namespace Assets.Script.Framework.Data
         /// 缩略图名
         /// </summary>
         public string picPath;
+
+        /// <summary>
+        /// 最后的姓名
+        /// </summary>
+        public string currentName;
 
         /// <summary>
         /// 最后的文字
@@ -43,6 +53,14 @@ namespace Assets.Script.Framework.Data
             this.picPath = pic;
         }
 
-        public SavingInfo() { }
+        public SavingInfo()
+        {
+            gameMode = "";
+            saveTime = "";
+            saveText = "";
+            picPath = "";
+            currentName = "";
+            currentText = "";
+        }
     }
 }

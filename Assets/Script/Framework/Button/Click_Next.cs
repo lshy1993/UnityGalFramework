@@ -10,23 +10,52 @@ namespace Assets.Script.Framework.UI
     public class Click_Next : MonoBehaviour, IPointerClickHandler
     {
         public GameManager gm;
-        public DialogBoxUIManager uiManger;
-        //public ToggleAuto ta;
+        public MessageUIManager uiManger;
+        public ToggleAuto ta;
+        
+        /// <summary>
+        /// 快进模式
+        /// </summary>
+        private bool skipmode;
 
         void Update()
         {
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            if (skipmode)
             {
-                Execute();
+                // 跳过所有 或者 已读文本
+                if (DataManager.GetInstance().configData.skipAll || DataManager.GetInstance().IsTextRead())
+                {
+                    Execute();
+                }
             }
+            else
+            {
+                //跳过
+                if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                {
+                    Execute();
+                }
+                // 空格 回车 触发左键
+                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                {
+                    Execute();
+                }
+            }
+            
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
             //base.OnPointerClick(eventData);
+            //if (Input.GetMouseButtonUp(1)) return;
+            skipmode = false;
             if (eventData.button != PointerEventData.InputButton.Left)
                 return;
-            //if (Input.GetMouseButtonUp(1)) return;
+            Execute();
+        }
+
+        public void Execute()
+        {
             // 如果锁定点击 则直接返回
             if (DataManager.GetInstance().IsClickBlocked())
             {
@@ -36,27 +65,26 @@ namespace Assets.Script.Framework.UI
             // 如果auto模式开启 则关闭计时器
             else if (DataManager.GetInstance().isAuto)
             {
-                Execute();
-                Debug.Log("刷新计时器");
-                //ta.ResetTimer();
+                Debug.Log("关闭计时器");
+                ScriptUpdate();
+                ta.ResetTimer();
             }
             // 如果对话框被隐藏
             else if (uiManger.IsBoxClosed())
             {
-                Debug.Log("显示对话框");
+                Debug.Log("恢复对话框显示");
                 uiManger.ShowWindow();
                 return;
             }
             else
             {
                 //Debug.Log("clicked");
-                Execute();
+                ScriptUpdate();
             }
         }
 
-        public void Execute()
+        private void ScriptUpdate()
         {
-            //if (DataManager.GetInstance().IsClickBlocked()) return;
             //否则根据Script类型执行Update
             if (typeof(TextScript).IsInstanceOfType(gm.GetCurrentNode()))
             {
@@ -66,7 +94,12 @@ namespace Assets.Script.Framework.UI
             {
                 Debug.Log("无效点击");
             }
-
         }
+
+        public void SkipMode()
+        {
+            skipmode = !skipmode;
+        }
+
     }
 }

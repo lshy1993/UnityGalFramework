@@ -28,7 +28,7 @@ namespace Assets.Script.Framework.Data
         /// <summary>
         /// 背景图片名
         /// </summary>
-        public string bgSprite;
+        public Dictionary<int, SpriteState> bgSprites;
 
         /// <summary>
         /// 立绘信息
@@ -59,6 +59,9 @@ namespace Assets.Script.Framework.Data
         /// 当前播放的语音文件名
         /// </summary>
         public string Voice;
+
+        public string heroXing;
+        public string heroMing;
 
     }
 }

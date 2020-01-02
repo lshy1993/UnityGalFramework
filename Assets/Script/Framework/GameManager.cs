@@ -1,13 +1,14 @@
-using System.Collections;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-using Assets.Script.Framework.Effect;
+//using Assets.Script.Framework.Effect;
+using Assets.Script.Framework.Data;
 using Assets.Script.Framework.Node;
 using Assets.Script.Framework.UI;
 
 using UnityEngine;
-
 
 namespace Assets.Script.Framework
 {
@@ -159,17 +160,61 @@ namespace Assets.Script.Framework
             Debug.Log("转换节点：由" + output1 + "至" + output2);
         }
 
+        public void ReturnTitle()
+        {
+            sm.StopBGM();
+            sm.StopSE();
+            sm.StopVoice();
+            ps.SwitchTo_VerifyIterative("Title_Panel");
+        }
 
         /// <summary>
         /// 新游戏入口
         /// </summary>
         public void NewGame()
         {
+            sm.StopBGM();
             //重置gameVar
             dm.InitGame();
             node = nodeFactory.FindTextScript(entryNode);
             //清空原先的文字记录
             dm.ClearHistory();
+        }
+
+        /// <summary>
+        /// 继续游戏入口
+        /// </summary>
+        public void Continue()
+        {
+            Dictionary<int, SavingInfo> savedic = DataManager.GetInstance().tempData.saveInfo;
+            if (savedic.ContainsKey(0) && savedic[0] != null)
+            {
+                Debug.Log("load data 0");
+                DataManager.GetInstance().Load(0);
+                sm.StopBGM();
+                //执行切换界面
+                string textName = DataManager.GetInstance().gameData.currentScript;
+                //界面复原
+                im.LoadImageInfo();
+                sm.LoadSoundInfo();
+                node = nodeFactory.FindTextScriptNoneInit(textName);
+            }
+        }
+
+        /// <summary>
+        /// 快速存档
+        /// </summary>
+        public void QuickSave()
+        {
+            DataManager.GetInstance().Save(-1);
+        }
+
+        /// <summary>
+        /// 快速读档
+        /// </summary>
+        public void QuickLoad()
+        {
+            DataManager.GetInstance().Load(-1);
         }
 
         public GameNode GetCurrentNode()
@@ -202,8 +247,8 @@ namespace Assets.Script.Framework
             //em初始化
             // em = EventManager.GetInstance();
             //eb初始化
-            EffectBuilder.Init(im, sm); //, CharacterManager.GetInstance()
-                                        //nf初始化
+            //NewEffectBuilder.Init(im, sm); //, CharacterManager.GetInstance()
+            //nf初始化
             nodeFactory = NodeFactory.GetInstance();
             nodeFactory.Init(dm, root, ps);
         }
@@ -225,5 +270,12 @@ namespace Assets.Script.Framework
                 SWP_SHOWWINDOW);
         }
 
+        void OnApplicationQuit()
+        {
+            //DataManager.GetInstance().Save(0);
+            DataManager.GetInstance().SaveMultiData();
+            DataManager.GetInstance().SaveConfigData();
+            Debug.Log("Application ending after " + Time.time + " seconds");
+        }
     }
 }

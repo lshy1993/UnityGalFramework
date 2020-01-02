@@ -25,14 +25,14 @@ namespace Assets.Script.Framework.Node
 
         public override void Exec()
         {
-            DialogBoxUIManager uiManger = diabox.GetComponent<DialogBoxUIManager>();
+            MessageUIManager uiManger = diabox.GetComponent<MessageUIManager>();
             if (isopen) uiManger.Open(time, new Action(() => { }));
             else uiManger.Close(time, new Action(() => { }));
         }
 
         public void ExecAuto(Action callback)
         {
-            DialogBoxUIManager uiManger = diabox.GetComponent<DialogBoxUIManager>();
+            MessageUIManager uiManger = diabox.GetComponent<MessageUIManager>();
             if (isopen) uiManger.Open(time, callback);
             else uiManger.Close(time, callback);
         }

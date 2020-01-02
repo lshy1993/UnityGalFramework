@@ -6,10 +6,18 @@ using UnityEngine.UI;
 
 namespace Assets.Script.Framework.UI
 {
+	/// <summary>
+    /// 常见画面设定
+    /// </summary>
     public class GraphicSettingUIManager : MonoBehaviour
     {
+    	
         public Toggle winBtn, fullBtn;
         public Toggle fadeOnBtn, fadeOffBtn;
+        public Toggle autoHideBtn, showBtn;
+
+        public Toggle skipReadBtn, skipAllBtn;
+        //public Toggle fadeOnBtn, fadeOffBtn;
         //public GameObject animeOnBtn, animeOffBtn;
         public Toggle avatarOnBtn, avatarOffBtn;
         public Toggle topOnBtn, topOffBtn;
@@ -24,21 +32,35 @@ namespace Assets.Script.Framework.UI
             dm = DataManager.GetInstance();
             //设置画面大小
             SetTogglePressed(Screen.fullScreen ? fullBtn : winBtn);
+
+            // 界面自动隐藏
+            bool flag = dm.configData.autoHide;
+            SetTogglePressed(flag ? autoHideBtn : showBtn);
+
+            //跳过全部
+            flag = dm.configData.skipAll;
+            SetTogglePressed(flag ? skipAllBtn : skipReadBtn);
+            
             //设置画面效果
-            bool flag = dm.configData.fadingSwitch;
+            flag = dm.configData.fadingSwitch;
             SetTogglePressed(flag ? fadeOnBtn : fadeOffBtn);
+
             //设置动画效果
             //flag = dm.configData.animateSwitch;
             //SetTogglePressed(flag ? animeOnBtn : animeOffBtn);
+
             //设置头像
             flag = dm.configData.avatarSwitch;
             SetTogglePressed(flag ? avatarOnBtn : avatarOffBtn);
+
             //总在最前
             flag = dm.configData.topMost;
             SetTogglePressed(flag ? topOnBtn : topOffBtn);
+
             //Live2D
             //live2dOnBtn.GetComponent<Button>().enabled = false;
             //live2dOffBtn.GetComponent<Button>().enabled = false;
+
             //设置标签显示
             //int xx = dm.configData.BGMTime;
             //bgmSld.value = xx / 31f;
@@ -120,6 +142,24 @@ namespace Assets.Script.Framework.UI
             SetTogglePressed(flag ? avatarOffBtn : avatarOnBtn);
             SetToggleAvailable(flag ? avatarOnBtn : avatarOffBtn);
             dm.configData.avatarSwitch = !flag;
+        }
+
+        public void SwitchHide()
+        {
+            bool flag = dm.configData.autoHide;
+            //SetTogglePressed(flag ? autoHideBtn : showBtn);
+            //SetToggleAvailable(flag ? showBtn : autoHideBtn);
+            dm.configData.autoHide = !flag;
+            Debug.Log("autohide:" + dm.configData.autoHide);
+        }
+
+        public void SwitchSkip()
+        {
+            bool flag = dm.configData.skipAll;
+            //SetTogglePressed(flag ? skipReadBtn : skipAllBtn);
+            //SetToggleAvailable(flag ? skipAllBtn : skipReadBtn);
+            dm.configData.skipAll = !flag;
+            Debug.Log("skipall:" + dm.configData.skipAll);
         }
     }
 }

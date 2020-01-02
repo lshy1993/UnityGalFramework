@@ -11,8 +11,8 @@ namespace Assets.Script.Framework.UI
 {
     public class FinUIManager : MonoBehaviour
     {
-        public SoundManager sm;
-        public PanelSwitch ps;
+        public GameManager gm;
+        //public PanelSwitch ps;
         public GameObject picPanel;
         public GameObject castTable;
 
@@ -31,10 +31,10 @@ namespace Assets.Script.Framework.UI
 
         private void OnEnable()
         {
-            picPanel.GetComponent<Image>().sprite = null;
-            castTable.transform.localPosition = new Vector3(0, -540);
+            //picPanel.GetComponent<Image>().sprite = null;
+            //castTable.transform.localPosition = new Vector3(0, -540);
             StartCoroutine(OpenAnimate());
-            StartCoroutine(ShowPic());
+            //StartCoroutine(ShowPic());
         }
 
         /// <summary>
@@ -42,23 +42,23 @@ namespace Assets.Script.Framework.UI
         /// </summary>
         private IEnumerator OpenAnimate()
         {
-            sm.SetBGM("ed");
-            yield return new WaitForSeconds(1f);
-            //预设总时长
-            float tall = 60f;
+            //sm.SetBGM("ed");
+            //yield return new WaitForSeconds(1f);
+            ////预设总时长
+            //float tall = 60f;
 
-            //初始位置
-            float t = -540;
-            while (t < maxHeight)
-            {
-                t = Mathf.MoveTowards(t, maxHeight, maxHeight / tall * Time.deltaTime);
-                castTable.transform.localPosition = new Vector3(0, t);
-                yield return null;
-            }
+            ////初始位置
+            //float t = -540;
+            //while (t < maxHeight)
+            //{
+            //    t = Mathf.MoveTowards(t, maxHeight, maxHeight / tall * Time.deltaTime);
+            //    castTable.transform.localPosition = new Vector3(0, t);
+            //    yield return null;
+            //}
             yield return new WaitForSeconds(5f);
             //TODO:等待点击
             StopAllCoroutines();
-            ps.SwitchTo_VerifyIterative("Title_Panel");
+            gm.ReturnTitle();
         }
 
         /// <summary>

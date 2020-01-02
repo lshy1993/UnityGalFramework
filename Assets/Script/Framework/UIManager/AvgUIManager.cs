@@ -7,14 +7,12 @@ using UnityEngine.UI;
 
 namespace Assets.Script.Framework.UI
 {
-
     public class AvgUIManager : MonoBehaviour
     {
-        //private GameObject root;
+        private GameObject root;
         public GameManager gm;
         public GameObject avgObject;
         public CanvasGroup avgPanel;
-
 
         //// Use this for initialization
         //void Awake()
@@ -24,21 +22,17 @@ namespace Assets.Script.Framework.UI
         //    Debug.Log("AvgPanel init");
         //}
 
-
-
-        private GameObject root;
-
         /// <summary>
         /// 存储面板名称
         /// </summary>
         public readonly List<string> PANEL_NAMES = new List<string>()
-    {
-        "Invest",
-        "DialogBox",
-        "Reasoning",
-        "Enquire",
-        "Negotiate"
-    };
+        {
+            "Invest",
+            "DialogBox",
+            "Reasoning",
+            "Enquire",
+            "Negotiate"
+        };
 
         Dictionary<string, GameObject> panels;
         private string current;
@@ -47,6 +41,12 @@ namespace Assets.Script.Framework.UI
         {
 
 
+        }
+
+        private void OnDisable()
+        {
+            // 储存至save0
+            DataManager.GetInstance().Save(0);
         }
 
         // Use this for initialization

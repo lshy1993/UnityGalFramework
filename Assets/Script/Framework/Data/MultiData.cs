@@ -11,6 +11,11 @@ namespace Assets.Script.Framework.Data
     public class MultiData
     {
         /// <summary>
+        /// 记录剧本块已读位置
+        /// </summary>
+        public Dictionary<string, int> scriptTable;
+
+        /// <summary>
         /// 音乐浏览开启表
         /// </summary>
         public Dictionary<int, bool> musicTable;
@@ -32,6 +37,7 @@ namespace Assets.Script.Framework.Data
 
         public MultiData()
         {
+            scriptTable = new Dictionary<string, int>();
             musicTable = new Dictionary<int, bool>();
             cgTable = new Dictionary<int, bool>();
             endingTable = new Dictionary<int, bool>();

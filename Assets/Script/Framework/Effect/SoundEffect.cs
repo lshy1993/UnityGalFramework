@@ -55,5 +55,13 @@ namespace Assets.Script.Framework.Effect
             loop = false;
         }
 
+        public override string ToString()
+        {
+            string oo = "";
+            oo += target;
+            oo += clip;
+            return oo;
+        }
+
     }
 }

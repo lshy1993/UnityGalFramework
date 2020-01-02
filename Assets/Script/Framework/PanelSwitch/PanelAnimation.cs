@@ -15,6 +15,7 @@ namespace Assets.Script.Framework.UI
 
         public virtual void Init()
         {
+            Debug.Log(transform.name + " Animation Init");
             panel = transform.GetComponent<CanvasGroup>();
         }
 

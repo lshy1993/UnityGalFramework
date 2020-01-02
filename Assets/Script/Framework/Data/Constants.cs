@@ -99,8 +99,10 @@ namespace Assets.Script.Framework.Data
 
         public enum WarningMode
         {
-            Title, Quit, Save, Load, Delete
+            Title, Quit, Save, Load, Delete, Copy
         }
+
+
 
     }
 

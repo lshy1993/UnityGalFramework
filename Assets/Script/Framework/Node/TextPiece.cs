@@ -19,8 +19,10 @@ namespace Assets.Script.Framework.Node
 
         private GameObject diabox;
 
-        private Text nameLabel, dialogLabel;
-        private Image avatarSprite;
+        //private Text nameLabel, dialogLabel;
+        //private Image avatarSprite;
+
+        private int l2dmouth = -1;
 
         public bool finish = false;
 
@@ -32,10 +34,11 @@ namespace Assets.Script.Framework.Node
         /// <param name="name">名字</param>
         /// <param name="dialog">对话内容</param>
         /// <param name="avatar">头像图片名</param>
-        public TextPiece(int id, GameObject diabox, string name = "", string dialog = "", string avatar = "", string voice = "") : base(id)
+        public TextPiece(int id, GameObject diabox, string name = "", string dialog = "", string avatar = "", string voice = "", int model = -1) : base(id)
         {
             this.diabox = diabox;
             setVars(name, dialog, avatar, voice);
+            SetModel(model);
         }
 
         /// <summary>
@@ -134,7 +137,7 @@ namespace Assets.Script.Framework.Node
 
         public override void Exec()
         {
-            DialogBoxUIManager uiManager = diabox.GetComponent<DialogBoxUIManager>();
+            MessageUIManager uiManager = diabox.GetComponent<MessageUIManager>();
             SoundManager sm = GameObject.Find("GameManager").GetComponent<SoundManager>();
             //判断是否在打字途中点击第二下
             if (uiManager.IsTyping())
@@ -148,9 +151,19 @@ namespace Assets.Script.Framework.Node
             {
                 HistoryManager hm = GameObject.Find("GameManager").GetComponent<HistoryManager>();
                 hm.AddToTable(new BacklogText(name, dialog, voice, avatar));
+                hm.SetCurrentText(name, dialog);
                 //通过UIManager设置文字，并开启打字机
                 uiManager.SetText(this, name, dialog, voice, avatar);
-                sm.SetVoice(voice);
+                if(l2dmouth == -1)
+                {
+                    sm.SetVoice(voice);
+                }
+                else
+                {
+                    // liv2d口型部分
+                    ImageManager im = GameObject.Find("GameManager").GetComponent<ImageManager>();
+                    sm.SetVoiceWithLive2d(voice, im.GetLive2dObject(0));
+                }
                 //模块设为未结束
                 finish = false;
             }
@@ -159,7 +172,7 @@ namespace Assets.Script.Framework.Node
 
         public void Clear()
         {
-            DialogBoxUIManager uiManager = diabox.GetComponent<DialogBoxUIManager>();
+            MessageUIManager uiManager = diabox.GetComponent<MessageUIManager>();
             uiManager.ClearText();
         }
 
@@ -169,6 +182,11 @@ namespace Assets.Script.Framework.Node
             this.dialog = dialog;
             this.avatar = avatar;
             this.voice = voice;
+        }
+
+        private void SetModel(int x)
+        {
+            this.l2dmouth = x;
         }
 
         public override string ToString()
