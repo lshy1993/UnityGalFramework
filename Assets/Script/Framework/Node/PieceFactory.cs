@@ -118,6 +118,16 @@ namespace Assets.Script.Framework.Node
         }
 
         /// <summary>
+        /// 换行
+        /// </summary>
+        public TextPiece r()
+        {
+            TextPiece tp = new TextPiece(id++, msgpanel);
+            tp.SetLineFeed();
+            return tp;
+        }
+
+        /// <summary>
         /// 清空页面
         /// </summary>
         public TextPiece p()
@@ -188,7 +198,7 @@ namespace Assets.Script.Framework.Node
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.RotateFade(spriteName, inverse, time));
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
             return new EffectPiece(id++, effects);
         }
 
@@ -202,7 +212,7 @@ namespace Assets.Script.Framework.Node
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.PreTransByDepth(depth));
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
             effects.Enqueue(NewEffectBuilder.SideFade(spriteName, direction, time));
             return new EffectPiece(id++, effects);
         }
@@ -211,7 +221,7 @@ namespace Assets.Script.Framework.Node
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.SideFade(spriteName, direction, time));
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
             return new EffectPiece(id++, effects);
         }
 
@@ -225,7 +235,7 @@ namespace Assets.Script.Framework.Node
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.Circle(spriteName, inverse, time));
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
             return new EffectPiece(id++, effects);
         }
 
@@ -241,7 +251,7 @@ namespace Assets.Script.Framework.Node
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             if (isBoth) effects.Enqueue(NewEffectBuilder.ScrollBoth(spriteName, direction, time));
             else effects.Enqueue(NewEffectBuilder.Scroll(spriteName, direction, time));
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
             return new EffectPiece(id++, effects);
         }
 
@@ -255,7 +265,7 @@ namespace Assets.Script.Framework.Node
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.Universial(spriteName, ruleName, time));
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
             return new EffectPiece(id++, effects);
         }
 
@@ -269,7 +279,7 @@ namespace Assets.Script.Framework.Node
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.Shutter(spriteName, direction, time));
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
             return new EffectPiece(id++, effects);
         }
 
@@ -346,7 +356,7 @@ namespace Assets.Script.Framework.Node
         public EffectPiece PreTransBackground()
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            effects.Enqueue(NewEffectBuilder.PreTransBackSprite());
+            effects.Enqueue(NewEffectBuilder.PreTransByDepth(-1));
             return new EffectPiece(id++, effects);
         }
 
@@ -358,7 +368,7 @@ namespace Assets.Script.Framework.Node
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             //effects.Enqueue(NewEffectBuilder.PreTransBackSprite(spriteName));
-            effects.Enqueue(NewEffectBuilder.TransBackSprite(transtime));
+            effects.Enqueue(NewEffectBuilder.TransByDepth(-1, transtime));
             return new EffectPiece(id++, effects);
         }
 
@@ -370,18 +380,18 @@ namespace Assets.Script.Framework.Node
         public EffectPiece TransBackgroundToImage(string spriteName, float transtime = 0.5f)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            effects.Enqueue(NewEffectBuilder.PreTransBackSprite());
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
-            effects.Enqueue(NewEffectBuilder.TransBackSprite(transtime));
+            effects.Enqueue(NewEffectBuilder.PreTransByDepth(-1));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
+            effects.Enqueue(NewEffectBuilder.TransByDepth(-1, transtime));
             return new EffectPiece(id++, effects);
         }
 
         public EffectPiece TransBackgroundToMovie(string spriteName, float transtime = 0.5f, bool isLoop = true)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            effects.Enqueue(NewEffectBuilder.PreTransBackSprite());
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName, true, isLoop));
-            effects.Enqueue(NewEffectBuilder.TransBackSprite(transtime));
+            effects.Enqueue(NewEffectBuilder.PreTransByDepth(-1));
+            effects.Enqueue(NewEffectBuilder.SetMovieSprite(-1, spriteName, isLoop));
+            effects.Enqueue(NewEffectBuilder.TransByDepth(-1, transtime));
             return new EffectPiece(id++, effects);
         }
 
@@ -394,10 +404,10 @@ namespace Assets.Script.Framework.Node
         public EffectPiece ChangeBackground(string spriteName, float fadeout = 0.5f, float fadein = 0.5f)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            effects.Enqueue(NewEffectBuilder.FadeOutBackSprite(fadeout));
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
-            effects.Enqueue(NewEffectBuilder.SetAlphaBackSprite(0));
-            effects.Enqueue(NewEffectBuilder.FadeInBackSprite(fadein));
+            effects.Enqueue(NewEffectBuilder.FadeOutByDepth(-1, fadeout));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
+            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(-1, 0));
+            effects.Enqueue(NewEffectBuilder.FadeInByDepth(-1, fadein));
             return new EffectPiece(id++, effects);
         }
 
@@ -407,7 +417,7 @@ namespace Assets.Script.Framework.Node
         /// <param name="depth">目标所在的层级</param>
         /// <param name="spriteName">新显示的图片名</param>
         /// <param name="position">新图片的位置</param>
-        public EffectPiece PreTransCharacterSprite(int depth)
+        public EffectPiece PreTransSprite(int depth)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.PreTransByDepth(depth));
@@ -421,7 +431,7 @@ namespace Assets.Script.Framework.Node
         /// <param name="spriteName">新显示的图片名</param>
         /// <param name="x">x轴坐标</param>
         /// <param name="y">y轴坐标</param>
-        public EffectPiece PreTransCharacterSprite(int depth, string spriteName, float x, float y)
+        public EffectPiece PreTransSprite(int depth, string spriteName, float x, float y)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.PreTransByDepth(depth, spriteName, new Vector3(x, y)));
@@ -507,6 +517,20 @@ namespace Assets.Script.Framework.Node
             return new EffectPiece(id++, effects);
         }
 
+        /// <summary>
+        /// 与渐变所有图层
+        /// </summary>
+        public EffectPiece PreTransAll()
+        {
+            Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
+            effects.Enqueue(NewEffectBuilder.PreTransAll());
+            return new EffectPiece(id++, effects);
+        }
+
+        /// <summary>
+        /// 将所有图层进行渐变
+        /// </summary>
+        /// <param name="transtime"></param>
         public EffectPiece TransAll(float transtime = 0.5f)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
@@ -514,25 +538,45 @@ namespace Assets.Script.Framework.Node
             return new EffectPiece(id++, effects);
         }
 
+        public EffectPiece SetCG(string spriteName, float alpha=1, int x=0, int y=0)
+        {
+            Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName, true));
+            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(-1, alpha));
+            effects.Enqueue(NewEffectBuilder.SetPostionByDepth(-1, new Vector3(x, y)));
+            effects.Enqueue(NewEffectBuilder.UnlockGallery(spriteName));
+            return new EffectPiece(id++, effects);
+        }
+
+        public EffectPiece SetMovieCG(string spriteName, bool isLoop = true, float alpha = 1, int x = 0, int y = 0)
+        {
+            Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
+            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(-1, alpha));
+            effects.Enqueue(NewEffectBuilder.SetPostionByDepth(-1, new Vector3(x, y)));
+            effects.Enqueue(NewEffectBuilder.UnlockGallery(spriteName));
+            return new EffectPiece(id++, effects);
+        }
 
         /// <summary>
         /// 设置背景（不带有转换特效）
         /// </summary>
         /// <param name="spriteName">需要更改的背景图片名</param>
-        public EffectPiece SetBackground(string spriteName)
+        public EffectPiece SetBackground(string spriteName,float alpha = 1,int x=0, int y=0)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
-            effects.Enqueue(NewEffectBuilder.SetAlphaBackSprite(1));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
+            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(-1, alpha));
+            effects.Enqueue(NewEffectBuilder.SetPostionByDepth(-1, new Vector3(x, y)));
             return new EffectPiece(id++, effects);
-
         }
 
-        public EffectPiece SetMovieBackground(string filename, bool isLoop = true)
+        public EffectPiece SetMovieBackground(string filename, bool isLoop = true, float alpha = 1, int x = 0, int y = 0)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(filename, true, isLoop));
-            effects.Enqueue(NewEffectBuilder.SetAlphaBackSprite(0));
+            effects.Enqueue(NewEffectBuilder.SetMovieSprite(-1, filename, isLoop));
+            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(-1, alpha));
+            effects.Enqueue(NewEffectBuilder.SetPostionByDepth(-1, new Vector3(x, y)));
             return new EffectPiece(id++, effects);
         }
 
@@ -542,11 +586,11 @@ namespace Assets.Script.Framework.Node
         /// <param name="depth">目标所在的层级</param>
         /// <param name="spriteName">需要更改的背景图片名</param>
         /// <param name="position">left | middle | right 左中右</param>
-        public EffectPiece SetCharacterSprite(int depth, string spriteName, string position = "middle")
+        public EffectPiece SetSprite(int depth, string spriteName, string position, float alpha = 1)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(depth, spriteName));
-            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(depth, 1));
+            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(depth, alpha));
             effects.Enqueue(NewEffectBuilder.SetDefaultPostionByDepth(depth, position));
             return new EffectPiece(id++, effects);
         }
@@ -558,7 +602,7 @@ namespace Assets.Script.Framework.Node
         /// <param name="spriteName">需要更改的背景图片名</param>
         /// <param name="x">x轴坐标</param>
         /// <param name="y">y轴坐标</param>
-        public EffectPiece SetCharacterSprite(int depth, string spriteName, float x, float y, float alpha)
+        public EffectPiece SetSprite(int depth, string spriteName, float alpha = 1, int x=0, int y=0)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(depth, spriteName));
@@ -567,15 +611,35 @@ namespace Assets.Script.Framework.Node
             return new EffectPiece(id++, effects);
         }
 
-        public EffectPiece SetVideoSprite(int depth, string filename)
+        public EffectPiece SetVideoSprite(int depth, string filename, float alpha = 1)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(depth, filename, true));
-            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(depth, 0));
+            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(depth, alpha));
             effects.Enqueue(NewEffectBuilder.SetPostionByDepth(depth, new Vector3(0, 0)));
             return new EffectPiece(id++, effects);
         }
 
+        /// <summary>
+        /// 移除精灵
+        /// </summary>
+        /// <param name="depth">层号</param>
+        /// <param name="delete">是否完全移除</param>
+        public EffectPiece RemoveSprite(int depth, bool delete = true)
+        {
+            Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
+            effects.Enqueue(NewEffectBuilder.Remove(depth,delete));
+            return new EffectPiece(id++, effects);
+        }
+
+        /// <summary>
+        /// 移除背景精灵
+        /// </summary>
+        /// <param name="delete">是否完全移除</param>
+        public EffectPiece RemoveBackground(bool delete = true)
+        {
+            return RemoveSprite(-1, delete);
+        }
 
         #endregion
 
@@ -588,9 +652,9 @@ namespace Assets.Script.Framework.Node
         public EffectPiece FadeinBackground(float fadein = 0.5f, bool sync = false)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            //effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
+            //effects.Enqueue(NewEffectBuilder.SetSprite(spriteName));
             //effects.Enqueue(NewEffectBuilder.SetAlphaBackSprite(0));
-            effects.Enqueue(NewEffectBuilder.FadeInBackSprite(fadein));
+            effects.Enqueue(NewEffectBuilder.FadeInByDepth(-1, fadein));
             return new EffectPiece(id++, effects);
         }
 
@@ -602,9 +666,9 @@ namespace Assets.Script.Framework.Node
         public EffectPiece FadeinBackground(string spriteName, float fadein = 0.5f)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName));
-            effects.Enqueue(NewEffectBuilder.SetAlphaBackSprite(0));
-            effects.Enqueue(NewEffectBuilder.FadeInBackSprite(fadein));
+            effects.Enqueue(NewEffectBuilder.SetSpriteByDepth(-1, spriteName));
+            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(-1, 0));
+            effects.Enqueue(NewEffectBuilder.FadeInByDepth(-1, fadein));
             return new EffectPiece(id++, effects);
         }
 
@@ -616,9 +680,9 @@ namespace Assets.Script.Framework.Node
         public EffectPiece FadeinMovieBackground(string spriteName, float fadein = 0.5f, bool isLoop = true)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            effects.Enqueue(NewEffectBuilder.SetBackSprite(spriteName, true, isLoop));
-            effects.Enqueue(NewEffectBuilder.SetAlphaBackSprite(0));
-            effects.Enqueue(NewEffectBuilder.FadeInBackSprite(fadein));
+            effects.Enqueue(NewEffectBuilder.SetMovieSprite(-1, spriteName, isLoop));
+            effects.Enqueue(NewEffectBuilder.SetAlphaByDepth(-1, 0));
+            effects.Enqueue(NewEffectBuilder.FadeInByDepth(-1, fadein));
             return new EffectPiece(id++, effects);
         }
 
@@ -629,7 +693,7 @@ namespace Assets.Script.Framework.Node
         public EffectPiece FadeoutBackground(float fadeout = 0.5f)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            effects.Enqueue(NewEffectBuilder.FadeOutBackSprite(fadeout));
+            effects.Enqueue(NewEffectBuilder.FadeOutByDepth(-1, fadeout));
             return new EffectPiece(id++, effects);
         }
 
@@ -723,7 +787,15 @@ namespace Assets.Script.Framework.Node
             return new EffectPiece(id++, effects);
         }
 
-        public EffectPiece MoveCharacterSpriteTo(int depth, float x, float y, float time = 0.5f, bool sync = false)
+        /// <summary>
+        /// 相对移动立绘（从当前的坐标开始移动）
+        /// </summary>
+        /// <param name="depth">目标所在的层级</param>
+        /// <param name="x">目标位置的x轴坐标</param>
+        /// <param name="y">目标位置的y轴坐标</param>
+        /// <param name="time">移动的时间，默认0.5s</param>
+        /// <param name="sync">是否等待完成（异步）</param>
+        public EffectPiece MoveCharacterSpriteBy(int depth, float x, float y, float time = 0.5f, bool sync = false)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.MoveByDepth(depth, new Vector3(x, y), time, sync));
@@ -731,7 +803,7 @@ namespace Assets.Script.Framework.Node
         }
 
         /// <summary>
-        /// 移动立绘（从设置的坐标开始移动）
+        /// 移动立绘（指定起点终点）
         /// </summary>
         /// <param name="depth">目标所在的层级</param>
         /// <param name="x_o">移动起点的x轴坐标</param>
@@ -739,7 +811,8 @@ namespace Assets.Script.Framework.Node
         /// <param name="x">目标位置的x轴坐标</param>
         /// <param name="y">目标位置的y轴坐标</param>
         /// <param name="time">移动的时间，默认0.5s</param>
-        public EffectPiece MoveCharacterSprite(int depth, float x_o, float y_o, float x, float y, float time = 0.5f, bool sync = false)
+        /// <param name="sync">是否等待完成（异步）</param>
+        public EffectPiece MoveCharacterSpriteFrom(int depth, float x_o, float y_o, float x, float y, float time = 0.5f, bool sync = false)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.SetPostionByDepth(depth, new Vector3(x_o, y_o)));
@@ -747,6 +820,13 @@ namespace Assets.Script.Framework.Node
             return new EffectPiece(id++, effects);
         }
 
+        /// <summary>
+        /// 移动背景（从当前的坐标开始移动）
+        /// </summary>
+        /// <param name="x">移动终点的x轴坐标</param>
+        /// <param name="y">移动终点的y轴坐标</param>
+        /// <param name="time">移动的时间，默认0.5s</param>
+        /// <param name="sync">是否等待完成（异步）</param>
         public EffectPiece MoveBackground(float x, float y, float time = 0.5f, bool sync = false)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
@@ -754,10 +834,26 @@ namespace Assets.Script.Framework.Node
             return new EffectPiece(id++, effects);
         }
 
-        public EffectPiece MoveBackground(float x_o, float y_o, float x, float y, float time = 0.5f, bool sync = false)
+        /// <summary>
+        /// 移动背景（指定起点终点）
+        /// </summary>
+        /// <param name="x_o">移动起点的x轴坐标</param>
+        /// <param name="y_o">移动起点的y轴坐标</param>
+        /// <param name="x">目标位置的x轴坐标</param>
+        /// <param name="y">目标位置的y轴坐标</param>
+        /// <param name="time">移动的时间，默认0.5s</param>
+        /// <param name="sync">是否等待完成（异步）</param>
+        public EffectPiece MoveBackgroundFrom(float x_o, float y_o, float x, float y, float time = 0.5f, bool sync = false)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.SetPostionByDepth(-1, new Vector3(x_o, y_o)));
+            effects.Enqueue(NewEffectBuilder.MoveByDepth(-1, new Vector3(x, y), time, sync));
+            return new EffectPiece(id++, effects);
+        }
+
+        public EffectPiece MoveBackgroundBy(float x, float y, float time = 0.5f, bool sync = false)
+        {
+            Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.MoveByDepth(-1, new Vector3(x, y), time, sync));
             return new EffectPiece(id++, effects);
         }
@@ -793,14 +889,14 @@ namespace Assets.Script.Framework.Node
             return new EffectPiece(id++, effects);
         }
 
-        public EffectPiece ScaleSprite(int depth, float x, float y, bool sync = false, float time = 0f)
-        {
-            Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
-            effects.Enqueue(NewEffectBuilder.ScaleToByDepth(depth, new Vector3(x, y, 1), time));
-            return new EffectPiece(id++, effects);
-        }
+        //public EffectPiece ScaleSprite(int depth, float x, float y, float time = 0f, bool sync = false)
+        //{
+        //    Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
+        //    effects.Enqueue(NewEffectBuilder.ScaleToByDepth(depth, new Vector3(x, y, 1), time));
+        //    return new EffectPiece(id++, effects);
+        //}
 
-        public EffectPiece ScaleSprite(int depth, float scale, bool sync = false, float time = 0f)
+        public EffectPiece ScaleSprite(int depth, float scale, float time = 0f, bool sync = false)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.ScaleToByDepth(depth, new Vector3(scale, scale, 1), time));
@@ -814,7 +910,7 @@ namespace Assets.Script.Framework.Node
         //    return new EffectPiece(id++, effects);
         //}
 
-        public EffectPiece ScaleBackground(float scale, float time = 0.5f, bool sync = false)
+        public EffectPiece ScaleBackground(float scale, float time = 0, bool sync = false)
         {
             Queue<NewImageEffect> effects = new Queue<NewImageEffect>();
             effects.Enqueue(NewEffectBuilder.ScaleToByDepth(-1, new Vector3(scale, scale, 1), time));

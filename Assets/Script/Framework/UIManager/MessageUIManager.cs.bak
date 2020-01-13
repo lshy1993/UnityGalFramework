@@ -36,8 +36,6 @@ namespace Assets.Script.Framework
             get { return DataManager.GetInstance().gameData.heroMing; }
         }
 
-        private static readonly string no_breaking_space = "\u00A0";
-
         private TextPiece currentPiece;
 
         [SerializeField]
@@ -97,7 +95,7 @@ namespace Assets.Script.Framework
         /// <param name="dialog">对话</param>
         /// <param name="voice">语音文件</param>
         /// <param name="avatar">头像文件</param>
-        public void SetText(TextPiece currentPiece, string dialog, string name, string avatar)
+        public void SetText(TextPiece currentPiece, string name, string dialog, string voice, string avatar = "")
         {
             // 设置成禁用右键和滚轮？
             DataManager.GetInstance().BlockRightClick();
@@ -106,8 +104,7 @@ namespace Assets.Script.Framework
             SetNameText(name);
             // 替换主角姓名文本
             dialog = ChangeName(dialog);
-            //dialogLabel.text = ;
-            SetContentStyle();
+            SetContentStyle(dialog);
             // 打字机
             te.enabled = true;
             te.ResetToBeginning(dialog);
@@ -122,7 +119,7 @@ namespace Assets.Script.Framework
         /// <param name="currentPiece"></param>
         /// <param name="dialog">文字</param>
         /// <param name="voice">对应语音</param>
-        public void AddText(TextPiece currentPiece, string dialog)
+        public void AddText(TextPiece currentPiece, string dialog, string voice)
         {
             // 设置成禁用右键和滚轮？
             DataManager.GetInstance().BlockRightClick();
@@ -131,11 +128,10 @@ namespace Assets.Script.Framework
             // 不显示姓名
             namePanel.SetActive(false);
             // 替换主角姓名文本
-            dialog = ChangeName(dialog);
-            SetContentStyle();
+            SetContentStyle(dialog);
             // 打字机
             te.enabled = true;
-            te.ResetTo(dialog);
+            te.ResetTo(ChangeName(dialog));
             typewriting = true;
             // 关闭头像
             avatarPanel.SetActive(false);
@@ -178,23 +174,13 @@ namespace Assets.Script.Framework
         {
             if (!string.IsNullOrEmpty(name))
             {
-                //nameLabel.text = name;
-                if(name == "HARUKI")
-                {
-                    namePanel.GetComponent<Image>().sprite = Resources.Load<Sprite>("UI/name-h");
-                    namePanel.GetComponent<Image>().SetNativeSize();
-                }
-                if (name == "KAORU")
-                {
-                    namePanel.GetComponent<Image>().sprite = Resources.Load<Sprite>("UI/name-k");
-                    namePanel.GetComponent<Image>().SetNativeSize();
-                }
-                //nameLabel.text = AddColor(name);//添加颜色
                 namePanel.SetActive(true);
+                //nameLabel.text = AddColor(name);//添加颜色
+                nameLabel.text = name;
             }
             else
             {
-                //nameLabel.text = string.Empty;
+                nameLabel.text = string.Empty;
                 namePanel.SetActive(false);
             }
         }
@@ -203,7 +189,7 @@ namespace Assets.Script.Framework
         /// 设置正文样式
         /// </summary>
         /// <param name="dialog"></param>
-        private void SetContentStyle()
+        private void SetContentStyle(string dialog)
         {
             // TODO: 设定已读样式 和 不同角色不同文字
             float a = DataManager.GetInstance().IsTextRead() ? 0.8f : 1f;
@@ -257,18 +243,7 @@ namespace Assets.Script.Framework
             nextIcon.SetActive(false);
         }
 
-        /// <summary>
-        /// 立即换行
-        /// </summary>
-        public void LineFeed()
-        {
-            HideNextIcon();
-            dialogLabel.text = dialogLabel.text + "\n";
-        }
-
-        /// <summary>
-        /// 清空文字框内容
-        /// </summary>
+        //清空文字框内容
         public void ClearText()
         {
             HideNextIcon();
@@ -298,42 +273,40 @@ namespace Assets.Script.Framework
         private Vector3 GetLastCharacterPos(GameObject go)
         {
             Text label = go.GetComponent<Text>();
-            float x = label.preferredWidth;
-            float y = label.preferredHeight - 32;
-            return new Vector3(x, -y);
+            string text = Regex.Replace(label.text, "<(.*?)>", "");
+            if (string.IsNullOrEmpty(text)) text = " ";
+            float fullSize = label.fontSize;
+            float x = 0f, y = fullSize;
+            RectTransform transform = label.GetComponent<RectTransform>();
+            float offx = 0;//trasform.offsetMin.x;
+            float offy = 0;// transform.offsetMax.y;
+            //Debug.Log(offx + " " + offy);
 
-            //string text = Regex.Replace(label.text, "<(.*?)>", "");
-            //if (string.IsNullOrEmpty(text)) text = " ";
-            //float fullSize = label.fontSize;
-            //float x = 0f, y = fullSize;
+            for (int i = 0; i < text.Length; i++)
+            {
+                var ch = text[i];
+                if (ch == '\n')
+                {
+                    y += fullSize + label.lineSpacing;
+                    x = 0f;
+                    continue;
+                }
+                else
+                {
+                    CharacterInfo charInfo;
+                    label.font.GetCharacterInfo(ch, out charInfo, label.fontSize);
+                    x += charInfo.advance;
+                    if (x > 1220)
+                    {
+                        y += fullSize + label.lineSpacing;
+                        x = charInfo.advance;
+                    }
+                }
+                
 
-            //Debug.Log(label.preferredHeight);
-            //Debug.Log(label.preferredWidth);
+            }
 
-            //RectTransform transform = label.GetComponent<RectTransform>();
-            //float xmax = transform.rect.width;
-            //for (int i = 0; i < text.Length; i++)
-            //{
-            //    var ch = text[i];
-            //    if (ch == '\n')
-            //    {
-            //        y += fullSize * label.pixelsPerUnit + label.lineSpacing;
-            //        x = 0f;
-            //        continue;
-            //    }
-            //    else
-            //    {
-            //        CharacterInfo charInfo;
-            //        label.font.GetCharacterInfo(ch, out charInfo, label.fontSize);
-            //        x += charInfo.advance;
-            //        if (x > xmax)
-            //        {
-            //            y += fullSize + label.lineSpacing;
-            //            x = charInfo.advance;
-            //        }
-            //    }
-            //}
-
+            return new Vector3(offx + x, offy - y, 0);
         }
 
         /// <summary>
@@ -344,10 +317,11 @@ namespace Assets.Script.Framework
             //获取最后一个文字定位
             Vector3 vec = GetLastCharacterPos(dialogLabel.gameObject);
             //Debug.Log(vec);
-            nextIcon.GetComponent<RectTransform>().anchoredPosition = new Vector3(vec.x + 12, vec.y);
-            //DOTween.Kill(nextIcon.GetComponent<RectTransform>());
-            //Tween tw = nextIcon.GetComponent<RectTransform>().DOAnchorPosY(vec.y + 2, 0.25f);
-            //tw.SetLoops(-1, LoopType.Yoyo);
+            nextIcon.GetComponent<TweenPosition>();
+            DOTween.Kill(nextIcon.GetComponent<RectTransform>());
+            nextIcon.GetComponent<RectTransform>().anchoredPosition = new Vector3(vec.x + 12, vec.y - 2);
+            Tween tw = nextIcon.GetComponent<RectTransform>().DOAnchorPosY(vec.y + 2, 0.25f);
+            tw.SetLoops(-1, LoopType.Yoyo);
             nextIcon.SetActive(true);
         }
 
@@ -410,7 +384,6 @@ namespace Assets.Script.Framework
         /// </summary>
         private string ChangeName(string origin)
         {
-            origin = origin.Replace(" ", no_breaking_space);
             return origin.Replace("李云萧", xing + ming);
         }
 

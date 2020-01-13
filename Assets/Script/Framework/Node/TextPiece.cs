@@ -17,7 +17,7 @@ namespace Assets.Script.Framework.Node
     {
         private enum OperateMode
         {
-            Line,PageLine,ClearPage
+            Line,PageLine,LineFeed,ClearPage
         }
         private OperateMode operate = 0;
 
@@ -170,6 +170,11 @@ namespace Assets.Script.Framework.Node
 
         public override void Exec()
         {
+            ExecAuto(() => { });
+        }
+
+        public void ExecAuto(Action callback)
+        {
             MessageUIManager uiManager = diabox.GetComponent<MessageUIManager>();
             SoundManager sm = GameObject.Find("GameManager").GetComponent<SoundManager>();
             //判断是否在打字途中点击第二下
@@ -185,24 +190,8 @@ namespace Assets.Script.Framework.Node
                 HistoryManager hm = GameObject.Find("GameManager").GetComponent<HistoryManager>();
                 hm.AddToTable(new BacklogText(name, dialog, voice, avatar));
                 hm.SetCurrentText(name, dialog);
-                //通过UIManager设置文字，并开启打字机
-                Debug.Log(operate);
-                switch (operate)
-                {
-                    case OperateMode.Line:
-                        uiManager.ClearText();
-                        uiManager.SetText(this, name, dialog, voice, avatar);
-                        break;
-                    case OperateMode.PageLine:
-                        uiManager.HideNextIcon();
-                        uiManager.AddText(this, dialog, voice);
-                        break;
-                    case OperateMode.ClearPage:
-                        uiManager.ClearText();
-                        break;
-                }
-                
-                if(l2dmouth == -1)
+
+                if (l2dmouth == -1)
                 {
                     sm.SetVoice(voice);
                 }
@@ -212,10 +201,35 @@ namespace Assets.Script.Framework.Node
                     ImageManager im = GameObject.Find("GameManager").GetComponent<ImageManager>();
                     sm.SetVoiceWithLive2d(voice, im.GetLive2dObject(0));
                 }
-                //模块设为未结束
-                finish = false;
+                //通过UIManager设置文字，并开启打字机
+                Debug.Log(operate);
+                switch (operate)
+                {
+                    case OperateMode.Line:
+                        uiManager.ClearText();
+                        uiManager.SetText(this, dialog, name, avatar);
+                        //未结束等待打字机
+                        finish = false;
+                        break;
+                    case OperateMode.PageLine:
+                        uiManager.HideNextIcon();
+                        uiManager.AddText(this, dialog);
+                        //未结束等待打字机
+                        finish = false;
+                        break;
+                    case OperateMode.LineFeed:
+                        uiManager.LineFeed();
+                        finish = true;
+                        callback();
+                        break;
+                    case OperateMode.ClearPage:
+                        uiManager.ClearText();
+                        // 已经执行完毕
+                        finish = true;
+                        callback();
+                        break;
+                }
             }
-
         }
 
         private void Clear()
@@ -227,6 +241,11 @@ namespace Assets.Script.Framework.Node
         public void SetPageLine()
         {
             operate = OperateMode.PageLine;
+        }
+
+        public void SetLineFeed()
+        {
+            operate = OperateMode.LineFeed;
         }
 
         private void SetVars(string name, string dialog, string avatar, string voice)

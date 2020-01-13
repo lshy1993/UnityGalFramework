@@ -25,6 +25,7 @@ namespace Assets.Script.Framework
     {
         private const string BG_PATH = "Background/";
         private const string CHARA_PATH = "Character/";
+        private const string CG_PATH = "CG/";
 
         public static readonly Vector3 LEFT = new Vector3(-300, 0, 0);
         public static readonly Vector3 MIDDLE = new Vector3(0, 0, 0);
@@ -80,43 +81,42 @@ namespace Assets.Script.Framework
 
         public void SetFast(bool fast) { isFast = fast; }
 
-        public Sprite LoadImage(string path, string name)
+        public Sprite LoadImage(string fullname)
         {
-            return Resources.Load<Sprite>(path + name);
+            Debug.Log(fullname);
+            return Resources.Load<Sprite>(fullname);
         }
-
-        public Sprite LoadBackground(string name)
-        {
-            return LoadImage(BG_PATH, name);
-        }
-        public Sprite LoadCharacter(string name)
-        {
-            return LoadImage(CHARA_PATH, name);
-        }
-
 
         /// <summary>
         /// 新建图层
         /// </summary>
         /// <param name="effect"></param>
+        /// <param name="recovered">是否需要复原</param>
         private GameObject NewSpriteLayer(NewImageEffect effect)
         {
-            // 如果有则删除 否则直接新建
             int depth = effect.depth;
-            GameObject go = GetSpriteByDepth(depth);
-            if (go != null)
-            {
-                DestroyImmediate(go);
-            }
-            Debug.Log(effect.ToString());
+            // 直接新建视频模板或者图片
             string prefab = effect.movie ? "Prefab/Video_Sprite" : "Prefab/Sprite";
-            go = Resources.Load(prefab) as GameObject;
+            GameObject go = Resources.Load(prefab) as GameObject;
             go = Instantiate(go);
             go.transform.SetParent(depth < 0 ? bgPanel.transform : fgPanel.transform, false);
             go.transform.name = "sprite" + depth;
+            go.transform.SetAsFirstSibling();
             return go;
         }
-        
+
+        private GameObject RenewSpriteLayer(NewImageEffect effect)
+        {
+            GameObject go = GetSpriteByDepth(effect.depth);
+            int sbi = go.transform.GetSiblingIndex();
+            float alpha = go.GetComponent<CanvasGroup>().alpha;
+            DestroyImmediate(go);
+            go = NewSpriteLayer(effect);
+            go.transform.SetSiblingIndex(sbi);
+            go.GetComponent<CanvasGroup>().alpha = alpha;
+            return go;
+        }
+
         /// <summary>
         /// 获取某一层的图片
         /// </summary>
@@ -145,7 +145,6 @@ namespace Assets.Script.Framework
         /// <param name="depth">层编号</param>
         private GameObject GetTransByDepth(int depth)
         {
-            GameObject go;
             Transform tr;
             if (depth < 0)
             {
@@ -155,26 +154,11 @@ namespace Assets.Script.Framework
             {
                 tr = fgPanel.transform.Find("trans" + depth);
             }
-            if (tr != null)
+            if (tr == null)
             {
-                go = tr.gameObject;
+                return null;
             }
-            else
-            {
-                //复制一层变成Trans
-                GameObject originSprite = GetSpriteByDepth(depth);
-                if(originSprite == null)
-                {
-                    Debug.LogError("未发现精灵，depth: " + depth);
-                    return null;
-                }
-                go = Instantiate(originSprite.gameObject) as GameObject;
-                go.transform.SetParent(originSprite.transform.parent, false);
-                go.transform.localPosition = originSprite.transform.localPosition;
-                go.transform.localScale = originSprite.transform.localScale;
-                go.transform.name = "trans" + depth;
-            }
-            return go;
+            return tr.gameObject;
         }
 
         public GameObject NewLive2dObject(int depth)
@@ -214,11 +198,24 @@ namespace Assets.Script.Framework
         /// 移除某一层
         /// </summary>
         /// <param name="depth">层编号</param>
-        private void RemoveSpriteByDepth(int depth)
+        private void RemoveSpriteByDepth(NewImageEffect effect)
         {
-            if (fgPanel.transform.Find("sprite" + depth) != null)
+            GameObject go = GetSpriteByDepth(effect.depth);
+            if(go != null)
             {
-                Destroy(fgPanel.transform.Find("sprite" + depth).gameObject);
+                if (effect.delete)
+                {
+                    // 完全删除
+                    DestroyImmediate(go);
+                }
+                else
+                {
+                    // 仅将image source删除
+                    Image im = go.GetComponent<Image>();
+                    if (im != null) im.sprite = null;
+                    VideoSprite vs = go.GetComponent<VideoSprite>();
+                    if (vs != null) vs.ClearClip();
+                }
             }
         }
 
@@ -257,19 +254,19 @@ namespace Assets.Script.Framework
             switch (effect.operate)
             {
                 case NewImageEffect.OperateMode.Set:
-                    ImageSet(effect);
+                    SetImage(effect);
                     callback();
                     break;
                 case NewImageEffect.OperateMode.SetAlpha:
-                    ImageSetAlpha(effect);
+                    SetImageAlpha(effect);
                     callback();
                     break;
                 case NewImageEffect.OperateMode.SetPos:
-                    ImageSetPos(effect);
+                    SetImagePos(effect);
                     callback();
                     break;
                 case NewImageEffect.OperateMode.SetRotate:
-                    ImageSetRotate(effect);
+                    SetImageRotate(effect);
                     callback();
                     break;
                 case NewImageEffect.OperateMode.Trans:
@@ -279,15 +276,11 @@ namespace Assets.Script.Framework
                     StartCoroutine(PreTransByDepth(effect, callback));
                     break;
                 case NewImageEffect.OperateMode.TransAll:
-                    float t = 0;//等待时长
-                    foreach (KeyValuePair<int, NewImageEffect> kv in transList)
-                    {
-                        if (kv.Value.time > t) t = kv.Value.time;
-                        StartCoroutine(TransByDepth(kv.Value, () => { }));
-                    }
-                    StartCoroutine(TransAll(t, callback));
+                    StartCoroutine(TransAll(effect.time, callback));
                     break;
-                case NewImageEffect.OperateMode.Delete:
+                case NewImageEffect.OperateMode.Remove:
+                    RemoveSpriteByDepth(effect);
+                    callback();
                     break;
                 case NewImageEffect.OperateMode.Wait:
                     StartCoroutine(Wait(effect, callback));
@@ -300,6 +293,10 @@ namespace Assets.Script.Framework
                     break;
                 case NewImageEffect.OperateMode.Live2d:
                     RunLive2d(effect, callback);
+                    break;
+                case NewImageEffect.OperateMode.Gallery:
+                    dm.UnlockGallery(effect.state.spriteName);
+                    callback();
                     break;
             }
         }
@@ -432,40 +429,49 @@ namespace Assets.Script.Framework
 
         #endregion
 
-        private void ImageSet(NewImageEffect effect)
+        /// <summary>
+        /// 新建图片
+        /// </summary>
+        /// <param name="effect"></param>
+        private void SetImage(NewImageEffect effect)
         {
-            GameObject go = NewSpriteLayer(effect);
-            //传入了图片名
+            // 获取图层 不存在则从模板新建
+            GameObject go = GetSpriteByDepth(effect.depth);
+            if (go == null) go = NewSpriteLayer(effect);
+            // 判断是否需要替换
+            VideoSprite vs = go.GetComponent<VideoSprite>();
+            Image im = go.GetComponent<Image>();
             if (effect.movie)
             {
+                if(vs == null) go = RenewSpriteLayer(effect);
                 // 是动态 RawImage
                 go.GetComponent<VideoSprite>().LoadClip(effect.state.spriteName);
             }
             else
             {
+                if (im == null) go = RenewSpriteLayer(effect);
                 // 静态图层
-                if (effect.target == NewImageEffect.ImageType.Fore)
-                {
-                    go.GetComponent<Image>().sprite = LoadCharacter(effect.state.spriteName);
-                }
-                else
-                {
-                    go.GetComponent<Image>().sprite = LoadBackground(effect.state.spriteName);
-                }
+                go.GetComponent<Image>().sprite = LoadImage(GetFullPath(effect));
                 go.GetComponent<Image>().SetNativeSize();
             }
             // 材质
             go.GetComponent<MaskableGraphic>().material = null;
         }
 
-        private void ImageSetAlpha(NewImageEffect effect)
+        private string GetFullPath(NewImageEffect effect)
+        {
+            string path = effect.state.path == -1 ? CG_PATH : effect.state.path == 0 ? BG_PATH : "";
+            return path + effect.state.spriteName;
+        }
+
+        private void SetImageAlpha(NewImageEffect effect)
         {
             GameObject go = GetSpriteByDepth(effect.depth);
             // 初始alpha
             go.GetComponent<MaskableGraphic>().color = new Color(1, 1, 1, effect.state.spriteAlpha);
         }
 
-        private void ImageSetPos(NewImageEffect effect)
+        private void SetImagePos(NewImageEffect effect)
         {
             GameObject go = GetSpriteByDepth(effect.depth);
             Vector3 pos = string.IsNullOrEmpty(effect.defaultpos) ?
@@ -474,7 +480,7 @@ namespace Assets.Script.Framework
             go.transform.localPosition = pos;
         }
 
-        private void ImageSetRotate(NewImageEffect effect)
+        private void SetImageRotate(NewImageEffect effect)
         {
             GameObject go = GetSpriteByDepth(effect.depth);
             go.transform.localRotation = Quaternion.Euler(effect.angle);
@@ -586,8 +592,15 @@ namespace Assets.Script.Framework
         /// 等待所有Trans完成
         /// </summary>
         private IEnumerator TransAll(float t, Action callback)
-        {
+        { 
+            foreach (KeyValuePair<int, NewImageEffect> kv in transList)
+            {
+                Debug.Log(kv.Key);
+                kv.Value.time = t;
+                StartCoroutine(TransByDepth(kv.Value, () => { }));
+            }
             yield return new WaitForSeconds(t);
+            // 清空list
             transList.Clear();
             callback();
         }
@@ -599,65 +612,49 @@ namespace Assets.Script.Framework
         /// <param name="callback"></param>
         private IEnumerator PreTransByDepth(NewImageEffect effect, Action callback)
         {
-            //向TransList添加层数
-            transList.Add(effect.depth, effect);
-            GameObject origin = GetSpriteByDepth(effect.depth);
-            GameObject trans = GetTransByDepth(effect.depth);
-
-            //复制本体给Trans层
-            //Image originSprite = GetComponent<Image>();
-            //Image transSprite = GetComponent<Image>();
-            //transSprite.sprite = originSprite.sprite;
-            //transSprite.color = originSprite.color;
-            //if (effect.depth != -1) transSprite.MakePixelPerfect();
-            // transSprite.depth = originSprite.depth + 1;
-
-            origin.GetComponent<MaskableGraphic>().color = new Color(1, 1, 1, 0);
-
-            yield return null;
-            //更换本体层为新内容
-            if (effect.movie)
+            //向待渐变TransList添加
+            if (transList.ContainsKey(effect.depth))
             {
-
-            //    if (origin.GetComponent<VideoSprite>() == null)
-            //    {
-            //        Destroy(origin.GetComponent<Image>());
-            //        origin.AddComponent<VideoPlayer>();
-            //        origin.AddComponent<RawImage>();
-            //        origin.AddComponent<VideoSprite>();
-            //    }
-            //    origin.GetComponent<VideoSprite>().LoadClip(effect.state.spriteName);
+                string msg = string.Format("发现未完成的渐变，已替换图层{0}的渐变", effect.depth);
+                Debug.LogWarning(msg);
+                transList[effect.depth] = effect;
             }
             else
             {
-            //    if (origin.GetComponent<VideoSprite>() != null)
-            //    {
-            //        Destroy(origin.GetComponent<VideoPlayer>());
-            //        Destroy(origin.GetComponent<RawImage>());
-            //        Destroy(origin.GetComponent<VideoSprite>());
-            //        origin.AddComponent<Image>();
-            //    }
-            //    Image originSprite = origin.GetComponent<Image>();
-            //    originSprite.color = new Color(1, 1, 1, 0);
-            //    if (effect.depth != -1)
-            //    {
-            //        originSprite.sprite = LoadCharacter(effect.state.spriteName);
-            //        originSprite.SetNativeSize();
-            //    }
-            //    else
-            //    {
-            //        originSprite.sprite = LoadBackground(effect.state.spriteName);
-            //    }
-            //}
-
-            //if (!string.IsNullOrEmpty(effect.defaultpos))
-            //{
-            //    origin.transform.localPosition = SetDefaultPos(origin, effect.defaultpos);
-            //}
-            //else
-            //{
-            //    origin.transform.localPosition = effect.state.GetPosition();
+                transList.Add(effect.depth, effect);
             }
+            GameObject origin = GetSpriteByDepth(effect.depth);
+            if(origin == null)
+            {
+                // 没有原图的时候
+                Debug.LogWarning("未发现精灵，depth: " + effect.depth);
+                // 创建隐藏的原图层用于后面展示
+                origin = NewSpriteLayer(effect);
+                origin.GetComponent<CanvasGroup>().alpha = 0;
+                origin.transform.SetAsFirstSibling();
+            }
+            else
+            {
+                GameObject trans = GetTransByDepth(effect.depth);
+                if (trans == null)
+                {
+                    Debug.Log("将原图复制成trans");
+                    //复制一层变成Trans
+                    trans = Instantiate(origin.gameObject) as GameObject;
+                    trans.transform.SetParent(origin.transform.parent, false);
+                    trans.transform.localPosition = origin.transform.localPosition;
+                    trans.transform.localScale = origin.transform.localScale;
+                    trans.transform.name = "trans" + effect.depth;
+                }
+                // 渐变层遮挡
+                trans.transform.SetAsLastSibling();
+                // 原图隐藏
+                origin.GetComponent<CanvasGroup>().alpha = 0;
+                origin.transform.SetAsFirstSibling();
+            }
+
+            yield return null;
+
             callback();
         }
 
@@ -671,15 +668,23 @@ namespace Assets.Script.Framework
         {
             GameObject origin = GetSpriteByDepth(effect.depth);
             GameObject trans = GetTransByDepth(effect.depth);
-            MaskableGraphic originSprite = origin.GetComponent<MaskableGraphic>();
-            MaskableGraphic transSprite = trans.GetComponent<MaskableGraphic>();
+            bool flag1 = origin != null;
+            bool flag2 = trans != null;
             //将trans淡出同时淡入原ui
             float t = 0;
             while (t < 1)
             {
                 t = Mathf.MoveTowards(t, 1, 1 / effect.time * Time.deltaTime);
-                transSprite.color = new Color(1, 1, 1, Mathf.Lerp(1, 0, t));
-                originSprite.color = new Color(1, 1, 1, Mathf.Lerp(0, 1, t));
+                if (flag1)
+                {
+                    //originSprite.color = new Color(1, 1, 1, Mathf.Lerp(0, 1, t));
+                    origin.GetComponent<CanvasGroup>().alpha = Mathf.Lerp(0, 1, t);
+                }
+                if (flag2)
+                {
+                    //transSprite.color = new Color(1, 1, 1, Mathf.Lerp(1, 0, t));
+                    trans.GetComponent<CanvasGroup>().alpha = Mathf.Lerp(1, 0, t);
+                }
                 yield return null;
             }
             //删除trans
@@ -695,7 +700,8 @@ namespace Assets.Script.Framework
             MaskableGraphic transSprite = trans.GetComponent<MaskableGraphic>();
             //设置shader
             transSprite.material = Resources.Load("Material/RotateFade") as Material;
-            Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            //Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            Texture2D te = LoadImage(GetFullPath(effect)).texture;
             transSprite.material.SetTexture("_NewTex", te);
             //正反向
             transSprite.material.SetInt("inverse", effect.inverse ? 1 : 0);
@@ -719,7 +725,8 @@ namespace Assets.Script.Framework
             MaskableGraphic transSprite = trans.GetComponent<MaskableGraphic>();
             //设置shader
             transSprite.material = Resources.Load("Material/SideFade") as Material;
-            Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            //Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            Texture2D te = LoadImage(GetFullPath(effect)).texture;
             transSprite.material.SetTexture("_NewTex", te);
             transSprite.material.SetInt("_Direction", (int)effect.direction);
             //效果
@@ -744,7 +751,8 @@ namespace Assets.Script.Framework
             transSprite.material = Resources.Load("Material/CircleHole") as Material;
             //ui.material = new Material(Shader.Find("Custom/CircleHole"));
             Debug.Log(effect.ToString());
-            Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            //Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            Texture2D te = LoadImage(GetFullPath(effect)).texture;
             transSprite.material.SetTexture("_NewTex", te);
             //正反向
             transSprite.material.SetInt("inverse", effect.inverse ? 1 : 0);
@@ -768,7 +776,8 @@ namespace Assets.Script.Framework
             MaskableGraphic transSprite = trans.GetComponent<MaskableGraphic>();
             //设置shader
             transSprite.material = Resources.Load("Material/ScrollBoth") as Material;
-            Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            //Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            Texture2D te = LoadImage(GetFullPath(effect)).texture;
             transSprite.material.SetTexture("_NewTex", te);
             transSprite.material.SetInt("_Direction", (int)effect.direction);
             //效果
@@ -794,7 +803,8 @@ namespace Assets.Script.Framework
             MaskableGraphic transSprite = trans.GetComponent<MaskableGraphic>();
             //设置shader
             transSprite.material = Resources.Load("Material/Shutter") as Material;
-            Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            //Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            Texture2D te = LoadImage(GetFullPath(effect)).texture;
             transSprite.material.SetTexture("_NewTex", te);
             transSprite.material.SetInt("_Direction", (int)effect.direction);
             //效果
@@ -820,9 +830,10 @@ namespace Assets.Script.Framework
             MaskableGraphic transSprite = trans.GetComponent<MaskableGraphic>();
             //设置shader
             transSprite.material = Resources.Load("Material/Mask") as Material;
-            Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            //Texture2D te = LoadBackground(effect.state.spriteName).texture;
+            Texture2D te = LoadImage(GetFullPath(effect)).texture;
             transSprite.material.SetTexture("_NewTex", te);
-            Texture2D mk = LoadImage("Rule/", effect.maskImage).texture;
+            Texture2D mk = LoadImage("Rule/" + effect.maskImage).texture;
             transSprite.material.SetTexture("_MaskTex", mk);
             //效果
             float t = 0;
@@ -867,8 +878,9 @@ namespace Assets.Script.Framework
         private void TweenMove(NewImageEffect effect)
         {
             GameObject ui = GetSpriteByDepth(effect.depth);
-            ui.transform.DOLocalMove(effect.state.GetPosition(), effect.time)
-                .SetEase(Ease.Linear);
+            ui.GetComponent<SpriteTweener>().Move(effect);
+            //ui.transform.DOLocalMove(effect.state.GetPosition(), effect.time)
+            //    .SetEase(Ease.Linear);
         }
 
         private IEnumerator Move(NewImageEffect effect, Action callback)
@@ -977,11 +989,12 @@ namespace Assets.Script.Framework
             //删除
             foreach (int i in GetDepthNum())
             {
-                RemoveSpriteByDepth(i);
+                DestroyImmediate(GetSpriteByDepth(-1));
             }
             if (includeBack)
             {
-                Destroy(GetSpriteByDepth(-1));
+                //Destroy(GetSpriteByDepth(-1));
+                DestroyImmediate(GetSpriteByDepth(-1));
                 //GetSpriteByDepth(-1).GetComponent<Image>().sprite = null;
             }
             //if (includeDiabox)duiManager.mainContainer.SetActive(false);
@@ -1059,12 +1072,16 @@ namespace Assets.Script.Framework
             // 储存当前的背景与立绘信息
             foreach (Transform child in bgPanel.transform)
             {
-                int depth = Convert.ToInt32(child.name.Substring(6));
+                if (child.name.Contains("trans")) continue;
+                string t = child.name.Replace("sprite", "");
+                int depth = Convert.ToInt32(t);
                 charaDic.Add(depth, GetSpriteInfo(depth, child));
             }
             foreach (Transform child in fgPanel.transform)
             {
-                int depth = Convert.ToInt32(child.name.Substring(6));
+                if (child.name.Contains("trans")) continue;
+                string t = child.name.Replace("sprite", "");
+                int depth = Convert.ToInt32(t);
                 charaDic.Add(depth, GetSpriteInfo(depth, child));
             }
             return charaDic;
@@ -1150,7 +1167,8 @@ namespace Assets.Script.Framework
                     go.transform.SetParent(depth < 0 ? bgPanel.transform : fgPanel.transform, false);
                     go.transform.name = "sprite" + depth;
                     Image ui = go.GetComponent<Image>();
-                    ui.sprite = depth < 0 ? LoadBackground(ss.spriteName): LoadCharacter(ss.spriteName); ;
+                    //ui.sprite = depth < 0 ? LoadBackground(ss.spriteName): LoadImage(ss.spriteName);
+                    ui.sprite = LoadImage(ss.spriteName);
                     ui.SetNativeSize();
                 }
                 //设置位置等

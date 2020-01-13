@@ -36,7 +36,7 @@ namespace Assets.Script.Framework.Node
             f = new PieceFactory(root, manager);
             nodeFactory = NodeFactory.GetInstance();
             InitText();
-            Debug.Log("TextScript init");
+            Debug.Log("SharpScript init");
             ps.SwitchTo_VerifyIterative_WithOpenCallback("Message_Panel", Update);
             //ps.SwitchTo_VerifyIterative("Message_Panel", Update);
         }
@@ -154,7 +154,8 @@ namespace Assets.Script.Framework.Node
                     else
                     {
                         //Debug.Log("文字块启用");
-                        t.Exec();
+                        t.ExecAuto(() => { Update(); });
+                        //t.Exec();
                     }
                 }
             }

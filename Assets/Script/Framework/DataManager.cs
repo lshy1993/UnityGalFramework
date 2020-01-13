@@ -420,7 +420,7 @@ namespace Assets.Script.Framework
         }
         #endregion
         
-        #region public 方法
+        #region Public 方法
         /// <summary>
         /// 清空文字记录
         /// </summary>
@@ -465,10 +465,21 @@ namespace Assets.Script.Framework
             return false;
         }
 
+        public void UnlockGallery(string sname)
+        {
+            if (multiData.cgTable.ContainsKey(sname))
+            {
+                multiData.cgTable[sname] = true;
+            }
+            else
+            {
+                multiData.cgTable.Add(sname, true);
+            }
+        }
 
         #endregion
 
-        #region Get / Set 方法
+        #region 变量 Get / Set 方法
         public void SetTempVar(string key, object value)
         {
             tempData.WriteTempVar(key, value);

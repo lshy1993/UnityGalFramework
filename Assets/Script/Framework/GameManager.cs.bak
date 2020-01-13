@@ -96,7 +96,6 @@ namespace Assets.Script.Framework
 
         public string version = "UnityGalgameFrame v0.1";
         public string entryNode = "demo0_0";
-        public int entryLine = 0;
 
         void Awake()
         {
@@ -177,12 +176,7 @@ namespace Assets.Script.Framework
             sm.StopBGM();
             //重置gameVar
             dm.InitGame();
-# if UNITY_EDITOR
-            dm.gameData.currentTextPos = entryLine;
-            node = nodeFactory.FindTextScriptNoneInit(entryNode);
-#else
             node = nodeFactory.FindTextScript(entryNode);
-#endif
             //清空原先的文字记录
             dm.ClearHistory();
         }

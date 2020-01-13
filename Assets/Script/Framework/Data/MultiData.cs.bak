@@ -18,12 +18,12 @@ namespace Assets.Script.Framework.Data
         /// <summary>
         /// 音乐浏览开启表
         /// </summary>
-        public Dictionary<string, bool> musicTable;
+        public Dictionary<int, bool> musicTable;
 
         /// <summary>
         /// CG浏览表
         /// </summary>
-        public Dictionary<string, bool> cgTable;
+        public Dictionary<int, bool> cgTable;
 
         /// <summary>
         /// 结局开启表
@@ -38,8 +38,8 @@ namespace Assets.Script.Framework.Data
         public MultiData()
         {
             scriptTable = new Dictionary<string, int>();
-            musicTable = new Dictionary<string, bool>();
-            cgTable = new Dictionary<string, bool>();
+            musicTable = new Dictionary<int, bool>();
+            cgTable = new Dictionary<int, bool>();
             endingTable = new Dictionary<int, bool>();
             caseTable = new Dictionary<int, bool>();
         }

@@ -10,19 +10,20 @@ using UnityEngine.Video;
 
 namespace Assets.Script.Framework
 {
-    public class VideoSprite : MonoBehaviour
+    [RequireComponent( typeof(VideoPlayer))]
+    public class VideoSprite : RawImage
     {
         public VideoPlayer vp;
-        public RawImage rui;
+        //public RawImage rui;
         private bool played;
 
-        private void Update()
-        {
-            if (!played && vp.isPrepared)
-            {
-                vp.Play();
-            }
-        }
+        //private void Update()
+        //{
+        //    if (!played && vp.isPrepared)
+        //    {
+        //        vp.Play();
+        //    }
+        //}
 
         public void LoadClip(string fname, bool isloop = true)
         {
@@ -32,9 +33,16 @@ namespace Assets.Script.Framework
             int h = Convert.ToInt32(vp.clip.height);
             var rtt = new RenderTexture(w, h, (int)Screen.dpi, RenderTextureFormat.ARGB32);
             vp.targetTexture = rtt;
-            rui.texture = rtt;
+            texture = rtt;
             vp.isLooping = isloop;
+            vp.Play();
             played = false;
+        }
+
+        public void ClearClip()
+        {
+            vp.clip = null;
+            texture = null;
         }
 
     }

@@ -107,9 +107,8 @@ namespace Assets.Script.Framework.UI
 
         private void ResetTypewriter()
         {
-            string ss = previewFlag ? "请调节合适的文字显示速度\r\n请调节合适的自动等待时间" : "Unity Galgame Framework by Lshy1993\r\nXianZhuo Soft ©COPYRIGHT";
-            //previewLabel.text = ss;
-            previewLabel.GetComponent<TypeWriter>().ResetToBeginning(ss);
+            string str = previewFlag ? "请调节合适的文字显示速度\r\n请调节合适的自动等待时间" : "Unity Galgame Framework by Lshy1993\r\nXianZhuo Soft ©COPYRIGHT";
+            previewLabel.GetComponent<TypeWriter>().ResetToBeginning(str);
         }
 
         private void ResetAlpha()

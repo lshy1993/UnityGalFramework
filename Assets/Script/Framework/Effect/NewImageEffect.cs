@@ -41,7 +41,7 @@ namespace Assets.Script.Framework.Effect
         /// </summary>
         public string defaultpos;
 
-        public enum ImageType { Back, Fore, AllChara, AllPic, All };
+        public enum ImageType { Sprite, AllChara, AllPic, All };
         /// <summary>
         /// 目标应用对象
         /// </summary>
@@ -53,7 +53,7 @@ namespace Assets.Script.Framework.Effect
             SetPos,
             SetAlpha,
             SetRotate,
-            Delete,
+            Remove,
             Wait,
             PreTrans,
             Trans,
@@ -61,7 +61,8 @@ namespace Assets.Script.Framework.Effect
             Action,
             Effect,
             Live2d,
-            Spine
+            Spine,
+            Gallery
         }
         public OperateMode operate = 0;
 
@@ -108,22 +109,6 @@ namespace Assets.Script.Framework.Effect
 
         }
 
-        //public enum OperateType
-        //{
-        //    SetSprite, SetPos, SetAlpha,
-        //    Delete,
-        //    Wait,
-        //    PreTrans, Trans, TransAll,
-        //    Fade, Move, Shutter, Twirl, Vortex,
-        //    Blur, Mosaic, Gray, OldPhoto,
-        //    Scroll, ScrollBoth, Circle, RotateFade,
-        //    SideFade,
-        //    Mask,
-        //    Universial,
-        //    Shake,WinShake,
-        //    SetLive2D,ChangeMotion,ChangeExpression
-        //};
-
         public enum Direction
         {
             Left, Right, Top, Bottom
@@ -168,6 +153,11 @@ namespace Assets.Script.Framework.Effect
         /// </summary>
         public string maskImage;
 
+        /// <summary>
+        /// 是否完全移除（移除信息）
+        /// </summary>
+        public bool delete;
+
         public NewImageEffect()
         {
             //time = 0;
@@ -200,7 +190,11 @@ namespace Assets.Script.Framework.Effect
                 "operate:【{0}】",
                 operate
                 );
-            if(operate == OperateMode.Trans)
+            if (operate == OperateMode.Set)
+            {
+                tt += "\n" + state.ToString();
+            }
+            else if(operate == OperateMode.Trans)
             {
                 tt += "-【" + transmode + "】\n";
             }

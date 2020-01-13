@@ -5,17 +5,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
-using DG.Tweening;
 
+using DG.Tweening;
+using System.Collections;
 //using TMPro;
 
 namespace Assets.Script.Framework.Effect
 {
-
-    //[RequireComponent(typeof(Text))]
+    [RequireComponent(typeof(Text))]
     public class TypeWriter : MonoBehaviour
     {
-        static public TypeWriter current;
+        //static public TypeWriter current;
 
         // 文字显示速度
         public float charsPerSecond = 20f;
@@ -32,55 +32,117 @@ namespace Assets.Script.Framework.Effect
 
         private Text mLabel;
 
-        // 全文本
+        /// <summary>
+        /// 已显示的文本
+        /// </summary>
         private string mLastText = "";
+
+        /// <summary>
+        /// 全文本
+        /// </summary>
         private string mFullText = "";
-        private int mCurrentOffset = 0;
-        private float mNextChar = 0f;
-        private bool mReset = true;
-        private bool mFinished = false;
+
+        class TextColorPair
+        {
+            public string text;
+            public Color color;
+        }
+
+        List<TextColorPair> dynamicText = new List<TextColorPair>();
 
         /// <summary>
         /// 判断是否结束打字
         /// </summary>
-        public bool isFinish { get { return mFinished; } }
+        public bool isFinish { get; private set; } = false;
+
+        private Tween tw;
+
+        private void Awake()
+        {
+            mLabel = GetComponent<Text>();
+        }
+
+        //void Update()
+        //{
+        //    if (dynamicText.Count == 0 && mLabel.text == mLastText)
+        //    {
+        //        Finish();
+        //        return;
+        //    }
+        //    string txt = mLastText;
+        //    foreach (var it in dynamicText)
+        //    {
+        //        txt += "<color=#" + ColorUtility.ToHtmlStringRGBA(it.color) + ">" + it.text + "</color>";
+        //    }
+        //    mLabel.text = txt;
+        //}
+
+        public void AddText(string txt)
+        {
+            Color startColor = mLabel.color;
+            startColor.a = 0;
+            var dst = new TextColorPair { text = txt, color = startColor };
+            dynamicText.Add(dst);
+            if (tw != null) tw.Kill();
+            tw = DOTween.ToAlpha(() => dst.color, (c) => dst.color = c, mLabel.color.a, 0.5f).OnComplete(() =>
+            {
+                dynamicText.Remove(dst);
+                mLastText += dst.text;
+            });
+        }
 
         /// <summary>
         /// 重新开始打字效果
         /// </summary>
-        public void ResetToBeginning()
+        public void ResetToBeginning(string fstr)
         {
-            mFinished = false;
-            mReset = true;
-            ////mNextChar = 0f;
-            //mCurrentOffset = 0;
-            //Update();
-            mLabel = GetComponent<Text>();
-            mFullText = mLabel.text;
+            isFinish = false;
+            //StartCoroutine(SetTextAnimation(fstr));
+            //mLastText = mLabel.text;
+            //mFullText = fstr;
+            //return;
+
+            //mFullText = mLabel.text;
+            mFullText = fstr;
             mLabel.text = string.Empty;
             float duration = mFullText.Length / charsPerSecond;
-            DOTween.Kill(GetComponent<Text>());
             //Debug.Log(mFullText + duration);
-            GetComponent<Text>()
+
+            DOTween.Kill(mLabel);
+            mLabel
                 .DOText(mFullText, duration)
                 .SetEase(Ease.Linear)
-                .OnComplete(()=> { Finish(); })
+                .OnComplete(() => { Finish(); })
                 .Play();
         }
 
         public void ResetTo(string wstr)
         {
-            mFinished = false;
-            mReset = false;
-            mLabel = GetComponent<Text>();
-            mFullText = mLabel.text + "\n" + wstr;
-            float duration = mFullText.Length / charsPerSecond;
-            DOTween.Kill(GetComponent<Text>());
-            GetComponent<Text>()
+            isFinish = false;
+
+            //StartCoroutine(SetTextAnimation(wstr));
+            //mLastText = mLabel.text;
+            //mFullText = mLabel.text + wstr;
+            //return;
+            
+            mFullText = mLabel.text + wstr;
+            float duration = wstr.Length / charsPerSecond;
+            DOTween.Kill(mLabel);
+            mLabel
                 .DOText(mFullText, duration)
                 .SetEase(Ease.Linear)
                 .OnComplete(() => { Finish(); })
                 .Play();
+        }
+
+        private IEnumerator SetTextAnimation(string mFullText)
+        {
+            for (int i = 0; i < mFullText.Length; i++)
+            {
+                AddText(mFullText[i].ToString());
+                float duration = 1 / charsPerSecond;
+                yield return new WaitForSeconds(duration);
+            }
         }
 
         /// <summary>
@@ -91,6 +153,7 @@ namespace Assets.Script.Framework.Effect
             //Debug.Log("finished");
             DOTween.Kill(GetComponent<Text>());
             mLabel.text = mFullText;
+            mLastText = "";
             onFinished.Invoke();
             return;
 

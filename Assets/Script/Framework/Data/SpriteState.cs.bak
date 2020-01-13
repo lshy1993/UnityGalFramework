@@ -17,7 +17,7 @@ namespace Assets.Script.Framework
             Normal, Movie, Live2d, Spine
         };
         public SpriteType type = 0;
-        public int path = 0;
+		public int path = 0;
         public float spritePosition_x, spritePosition_y;
         public float spriteAlpha;
         public float scalex, scaley;
