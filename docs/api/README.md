@@ -1,7 +1,7 @@
 # API
 
-## TextPiece
-文字操作块
+## 文字显示 TextPiece
+文字操作相关
 
 ### t(dialog, name, voice, avatar, model)
 向MessageLayer显示对话文字，可设定角色名，语音与头像
@@ -38,7 +38,7 @@
 ### p()
 清空当前显示的所有文字
 
-## DialogPiece 消息显示
+## 消息层显示 DialogPiece
 消息层相关方法
 
 ### SetDialogWindow()
@@ -175,7 +175,8 @@
 ### SetCG(spriteName, x, y, alpha)
 设置CG（背景层）并解锁CG列表
 ::: tip
-该方法实际调用 SetSprite(-1, spriteName, x, y, alpha)
+该方法与 SetSprite(-1, spriteName, x, y, alpha) 相同
+并向数据写入画廊文件解锁
 :::
 | Name        | Type    | Default  | Description  |
 | ------------- |:-------------|:-----|:-----|
@@ -187,7 +188,8 @@
 ### SetVideoCG(spriteName, isLoop, x, y, alpha)
 设置动态CG（背景层）并解锁CG列表
 ::: tip
-该方法实际调用 SetVideoSprite(-1, spriteName, isLoop, x, y, alpha)
+该方法与 SetVideoSprite(-1, spriteName, isLoop, x, y, alpha) 相同
+并向数据写入画廊文件解锁
 :::
 | Name        | Type    | Default  | Description  |
 | ------------- |:-------------|:-----|:-----|
@@ -323,8 +325,9 @@ delete为false时，相同层级的精灵将会继承原先的位置缩放等信
 
 ### Mask(maskName)
 蒙版
-
-<param name="maskName">蒙版图</param>
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| maskName | `string` | | 蒙版图片名 |
 
 ### Blur()
 模糊特效
@@ -332,150 +335,283 @@ delete为false时，相同层级的精灵将会继承原先的位置缩放等信
 ### Mosaic()
 马赛克特效
 
-### Gray(int depth = -1)
+### Gray(depth)
 灰度化特效
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级，默认-1 |
 
-### OldPhoto(int depth = -1)
+### OldPhoto(depth)
 老照片效果
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | -1 | 目标层级，默认-1 |
 
 ### Mono(int depth, uint colornum)
 颜色叠加
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | -1 | 目标层级，默认-1 |
+| color | `uint` |  | 色彩代码0x000000形式 |
 
-### Wait(float time)
+### Wait(time)
 等待特效完成
-        /// </summary>
-        /// <param name="time">时长s</param>
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| time | `float` | | 时长(s) |
 
-### ClearEffect(int depth = -1)
+### ClearEffect(depth)
 清除图层上的特效
-
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | -1 | 目标层级，默认-1 |
 
 ## Action 相关
 精灵动作（移动 缩放 旋转 改变透明度）相关
 
-### FadeSprite(int depth, float alpha, float time = 0, bool sync = false)
+### FadeSprite(depth, alpha, time, sync)
+渐变到指定透明度
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| alpha | `float` | | 透明度（0-1） |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-/// 渐变到指定透明度
-/// </summary>
-/// <param name="depth">操作图层</param>
-/// <param name="alpha">目标透明度</param>
-/// <param name="time">时间，默认0</param>
+### FadeSpriteBy(depth, alpha, time, sync)
+渐变到相对透明度
+::: error
+该方法还在测试中
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| alpha | `float` | | 透明度（0-1） |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### FadeSpriteBy(int depth, float alpha, float time = 0, bool sync = false)
+### FadeSpriteFrom(depth, alpha, time, sync)
+从指定透明度渐变到当前
+::: error
+该方法还在测试中
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| alpha | `float` | | 透明度（0-1） |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### FadeSpriteFrom(int depth, float alpha, float time = 0, bool sync = false)
+### FadeBackground(alpha, time, sync)
+渐变背景到指定透明度
+::: tip
+该方法实际调用FadeSprite(-1,alpha,time,sync)
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| alpha | `float` | | 透明度（0-1） |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### FadeBackground(float alpha, float time = 0, bool sync = false)
+### FadeBackgroundBy(alpha, time, sync)
+渐变背景到相对透明度
+::: error
+该方法还在测试中
+实际调用FadeSpriteBy(-1,alpha,time,sync)
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| alpha | `float` | | 透明度（0-1） |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### FadeBackgroundBy(float alpha, float time = 0, bool sync = false)
+### FadeBackgroundFrom(alpha, time, sync)
+从指定透明度渐变到当前
+::: error
+该方法还在测试中
+实际调用FadeSpriteFrom(-1,alpha,time,sync)
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| alpha | `float` | | 透明度（0-1） |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### FadeBackgroundFrom(float alpha, float time = 0, bool sync = false)
-
-### MoveSprite(int depth, string position, float time = 0)
+### MoveSprite(depth, position, time, sync)
+移动精灵（从当前位置移动）
 ::: warning
 该方法将在下个版本被废弃
 :::
-/// <summary>
-/// 移动立绘（从当前位置移动）
-/// </summary>
-/// <param name="depth">目标所在层级</param>
-/// <param name="position">left | middle | right</param>
-/// <param name="time">移动时间，默认0.5s</param>
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| position | `string` | | 预设位置 left/middle/right |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### MoveSprite(int depth, float x, float y, float time = 0, bool sync = false)
-/// <summary>
-/// 移动立绘（从当前坐标开始）
-/// </summary>
-/// <param name="depth">目标所在的层级</param>
-/// <param name="x">目标位置的x轴坐标</param>
-/// <param name="y">目标位置的y轴坐标</param>
-/// <param name="time">移动的时间，默认0.5s</param>
+### MoveSprite(depth, x, y, time, sync)
+移动精灵（从当前坐标开始）
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| x | `float` | | 移动终点的x轴坐标 |
+| y | `float` | | 移动终点的y轴坐标 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### MoveSpriteBy(int depth, float x, float y, float time = 0, bool sync = false)
-/// <summary>
-/// 相对移动立绘（从当前坐标开始）
-/// </summary>
-/// <param name="depth">目标所在的层级</param>
-/// <param name="x">目标位置的x轴坐标</param>
-/// <param name="y">目标位置的y轴坐标</param>
-/// <param name="time">移动的时间，默认0.5s</param>
-/// <param name="sync">是否等待完成（异步）</param>
+### MoveSpriteBy(depth, x, y, time, sync)
+移动精灵（相对当前坐标开始）
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| x | `float` | | 移动终点相对x轴坐标 |
+| y | `float` | | 移动终点相对y轴坐标 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### MoveSpriteFrom(int depth, float x_o, float y_o, float x, float y, float time = 0, bool sync = false)
-/// <summary>
-/// 移动立绘（指定起点终点）
-/// </summary>
-/// <param name="depth">目标所在的层级</param>
-/// <param name="x_o">移动起点的x轴坐标</param>
-/// <param name="y_o">移动起点的y轴坐标</param>
-/// <param name="x">目标位置的x轴坐标</param>
-/// <param name="y">目标位置的y轴坐标</param>
-/// <param name="time">移动的时间，默认0.5s</param>
-/// <param name="sync">是否等待完成（异步）</param>
+### MoveSpriteFrom(depth, x_o, y_o, time, sync)
+移动精灵（从起点到当前）
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| x_o | `float` | | 移动起点x轴坐标 |
+| y_o | `float` | | 移动起点y轴坐标 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### MoveBackground(float x, float y, float time = 0, bool sync = false)
-/// <summary>
-/// 移动背景（从当前坐标开始）
-/// </summary>
-/// <param name="x">移动终点的x轴坐标</param>
-/// <param name="y">移动终点的y轴坐标</param>
-/// <param name="time">移动的时间，默认0.5s</param>
-/// <param name="sync">是否等待完成（异步）</param>
+### MoveSpriteFromTo(depth, x_o, y_o, x, y, time, sync)
+移动精灵（指定起点终点）
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| x_o | `float` | | 移动终点相对x轴坐标 |
+| y_o | `float` | | 移动终点相对y轴坐标 |
+| x | `float` | | 移动终点x轴坐标 |
+| y | `float` | | 移动终点y轴坐标 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### MoveBackgroundBy(float x, float y, float time = 0, bool sync = false)
+### MoveBackground(x, y, time, sync)
+移动背景（从当前位置移动）
+::: tip
+该方法实际调用 MoveSprite(-1,x,y,time,sync)
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| x | `float` | | 移动终点的x轴坐标 |
+| y | `float` | | 移动终点的y轴坐标 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-/// <summary>
-/// 相对移动背景（从当前坐标开始）
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="time"></param>
-/// <param name="sync"></param>
-/// <returns></returns>
+### MoveBackgroundBy(x, y, time, sync)
+相对移动背景（从当前坐标开始）
+::: tip
+该方法实际调用 MoveSpriteBy(-1,x,y,time,sync)
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| x | `float` | | 移动终点相对x轴坐标 |
+| y | `float` | | 移动终点相对y轴坐标 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### MoveBackgroundFrom(float x_o, float y_o, float x, float y, float time = 0, bool sync = false)
+### MoveBackgroundFromTo(x_o, y_o, x, y, time, sync)
+移动背景（指定起点终点）
+::: tip
+该方法实际调用 MoveSpriteFromTo(-1,x_o,y_o,x,y,time,sync)
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| x_o | `float` | | 移动终点相对x轴坐标 |
+| y_o | `float` | | 移动终点相对y轴坐标 |
+| x | `float` | | 移动终点x轴坐标 |
+| y | `float` | | 移动终点y轴坐标 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-/// <summary>
-/// 移动背景（指定起点终点）
-/// </summary>
-/// <param name="x_o">移动起点的x轴坐标</param>
-/// <param name="y_o">移动起点的y轴坐标</param>
-/// <param name="x">目标位置的x轴坐标</param>
-/// <param name="y">目标位置的y轴坐标</param>
-/// <param name="time">移动的时间，默认0.5s</param>
-/// <param name="sync">是否等待完成（异步）</param>
+### RotateSprite(depth, angle, time, sync)
+旋转精灵（指定角度）
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| angle | `float` | | 旋转角度 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### RotateSprite(int depth, float angle, float time = 0, bool sync = false)
+### RotateSpriteBy(depth, angle, time, sync)
+旋转精灵（指定相对角度）
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| angle | `float` | | 相对旋转角度 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### RotateSpriteBy(int depth, float angle, float time = 0, bool sync = false)
+### RotateSpriteFrom(depth, from, to, time, sync)
+旋转精灵（从指定角度到）
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| from | `float` | | 起始角度 |
+| to | `float` | | 结束角度 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### RotateSpriteFrom(int depth, float from, float to, float time = 0, bool sync = false)
+### RotateBackground(angle, time, sync)
+旋转背景（指定角度）
+::: tip
+该方法实际调用 RotateSprite(-1,angle,time,sync)
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| angle | `float` | | 旋转角度 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### RotateBackground(float angle, float time = 0, bool sync = false)
+### RotateBackgroundBy(angle, time, sync)
+旋转背景（指定相对角度）
+::: tip
+该方法实际调用 RotateSpriteBy(-1,angle,time,sync)
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| angle | `float` | | 相对旋转角度 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### RotateBackgroundBy(float angle, float time = 0, bool sync = false)
+### RotateBackgroundFrom(from, to, time, sync)
+旋转背景（从指定角度到）
+::: tip
+该方法实际调用 RotateSpriteFrom(-1,from,to,time,sync)
+:::
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| from | `float` | | 起始角度 |
+| to | `float` | | 结束角度 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### RotateBackgroundFrom(float from, float to, float time = 0, bool sync = false)
+### ScaleSprite(depth, x, y, time, sync)
+缩放精灵（指定xy缩放比率）
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| x | `int` | | x方向缩放 |
+| y | `int` | | y方向缩放 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### ScaleSprite(int depth, int x, int y, float time = 0, bool sync = false)
-/// <summary>
-/// 缩放精灵
-/// </summary>
-/// <param name="depth">目标层级</param>
-/// <param name="x">x方向缩放</param>
-/// <param name="y">y方向缩放</param>
-/// <param name="time">时长，默认0</param>
-/// <param name="sync">是否同步进行</param>
+### ScaleSprite(depth, scale, time, sync)
+缩放精灵（指定缩放倍率）
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| scale | `float` | | 缩放倍数 |
+| time | `float` | 0 | 时长(s)，默认0 |
+| sync | `bool` | false | 是否异步进行 |
 
-### ScaleSprite(int depth, float scale, float time = 0, bool sync = false)
-缩放精灵
-/// <param name="depth">目标层级</param>
-/// <param name="scale">缩放倍数</param>
-/// <param name="time">时长，默认0</param>
-/// <param name="sync">是否同步进行</param>
-
-### ScaleBackground(int x, int y, float time = 0, bool sync = false)
-缩放背景精灵
+### ScaleBackground(x, y, time, sync)
+缩放背景（指定xy缩放比率）
 ::: tip
 该方法实际调用 ScaleSprite(-1, x, y, time, sync)
 :::
@@ -486,7 +622,7 @@ delete为false时，相同层级的精灵将会继承原先的位置缩放等信
 | time | `float` | 0 | 时长，默认0 |
 | sync | `bool` | false | 是否同步进行 |
 
-### ScaleBackground(float scale, float time = 0, bool sync = false)
+### ScaleBackground(scale, time, sync)
 缩放背景精灵
 ::: tip
 该方法实际调用 ScaleSprite(-1, scale, time, sync)
@@ -498,24 +634,26 @@ delete为false时，相同层级的精灵将会继承原先的位置缩放等信
 | sync | `bool` | false | 是否同步进行 |
 
 ### SpriteShake()
-立绘摇动
+摇动精灵
 
-### SpriteVibration(int depth, float v=10f, int freq = 100 , float time=0.5f, bool sync=true)
-        /// <summary>
-        /// 立绘震动
-        /// </summary>
-        /// <param name="depth">震动对象</param>
-        /// <param name="v">震动量</param>
-        /// <param name="speed">每秒震动次数</param>
-        /// <param name="time">持续时间</param>
+### SpriteVibration(depth, v, freq, time, sync)
+震动精灵
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| depth | `int` | | 目标层级 |
+| v | `float` | 10f | 震动量 |
+| speed | `int` | 100 | 每秒震动次数 |
+| time | `float` | 0.5 | 持续时间(s) |
+| sync | `bool` | false | 是否同步进行 |
 
-### WindowVibration(float time = 0.5f, float v = 0.01f, int freq = 100, bool sync = true)
-        /// <summary>
-        /// 窗口抖动（含UI）
-        /// </summary>
-        /// <param name="time">持续时间s，0则为永久</param>
-        /// <param name="v">震动量</param>
-        /// <param name="freq">每秒震动次数</param>
+### WindowVibration(v, freq, time, sync)
+窗口抖动（含UI）
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| v | `float` | 0.01f | 震动量 |
+| speed | `int` | 100 | 每秒震动次数 |
+| time | `float` | 0.5 | 持续时间(s) -1则为永久 |
+| sync | `bool` | false | 是否同步进行 |
 
 ### WaitAction(int depth = -1)
 等待异步Action完成
@@ -524,5 +662,71 @@ delete为false时，相同层级的精灵将会继承原先的位置缩放等信
 
 ### PlayMovie(string filename)
 
-## SoundPiece
+## 音频控制 SoundPiece
 
+### PlayBGM(name, vol, fadein, loop)
+播放背景音乐
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| name | `string` |  | 音频文件名 |
+| vol | `int` | 100 | 音频限制音量 |
+| fadein | `float` | 0.5 | 淡入时间(s)，默认0.5 |
+| loop | `bool` | true | 是否循环 |
+
+### StopBGM(fadeout)
+停止背景音乐
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| fadeout | `float` | 0.5 | 淡出时间(s)，默认0.5 |
+
+### PauseBGM(fadeout)
+暂停背景音乐
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| fadeout | `float` | 0 | 淡出时间(s)，默认0 |
+
+### UnpauseBGM(fadein)
+继续背景音乐
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| fadeout | `float` | 0 | 淡入时间(s)，默认0 |
+
+### ChangeVolumeBGM(vol, time)
+改变背景音乐音量
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| vol | `float` |  | 目标最终音量 |
+| time | `float` | 0.5 | 变动时间(s)，默认0.5 |
+
+### PlaySE(name, fadein, loop)
+播放音效
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| name | `string` |  | 音频文件名 |
+| vol | `int` | 100 | 音频限制音量 |
+| fadein | `float` | 0 | 淡入时间(s)，默认0 |
+| loop | `bool` | false | 是否循环 |
+
+### StopSE(fadeout)
+停止当前正在播放的音效
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| fadeout | `float` | 0 | 淡入时间(s)，默认0 |
+
+### PlayVoice(name, fadein, loop)
+播放语音
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| name | `string` |  | 音频文件名 |
+| vol | `int` | 100 | 音频限制音量 |
+| fadein | `float` | 0 | 淡入时间(s)，默认0 |
+| loop | `bool` | false | 是否循环 |
+
+### WaitBGM()
+等待BGM播放完毕（loop则跳过）
+
+### WaitSE()
+等待SE播放完毕（loop则跳过）
+
+### WaitVoice()
+等待语音播放完毕
