@@ -231,10 +231,19 @@ delete为false时，相同层级的精灵将会继承原先的位置缩放等信
 
 ## 渐变相关
 
-### PreTransBackground()
+### PretransAll()
+预渐变所有图层
+
+### TransAll(transtime)
+将所有图层进行渐变
+| Name        | Type    | Default  | Description  |
+| ------------- |:-------------|:-----|:-----|
+| transtime | `float` | 0.5f | 渐变时间，默认0.5s |
+
+### PretransBackground()
 预渐变背景
 ::: tip
-该方法实际调用 PreTransSprite(-1)
+该方法实际调用 PretransSprite(-1)
 :::
 
 ### TransBackground(transtime)
@@ -297,7 +306,7 @@ delete为false时，相同层级的精灵将会继承原先的位置缩放等信
 | fadeout | `float` | 0.5f | 原图淡出的时间，默认0.5s |
 | fadein | `float` | 0.5f | 新图淡入的时间，默认0.5s |
 
-### PreTransSprite(depth)
+### PretransSprite(depth)
 预渐变立绘
 | Name        | Type    | Default  | Description  |
 | ------------- |:-------------|:-----|:-----|

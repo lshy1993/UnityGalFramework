@@ -58,21 +58,21 @@ f.l("这个文字是看不见的"),
 可以看到，文字顺利的显示在了屏幕上。  
 这里你会看到几种指令的用法。
 
-- OpenDialog 显示消息层  
-OpenDialog是将消息层显示的函数，可以带一个参数淡入时长，默认为0.5秒。  
+- [OpenDialog 显示消息层](../api/#opendialog-time)  
+`OpenDialog`是将消息层显示的函数，可以带一个参数淡入时长，默认为0.5秒。  
 
-- l 显示文字  
-l是显示文字的函数，将一整句文字显示在屏幕上。  
+- [l 显示文字](../api/#l-dialog-voice-model)  
+`l`是显示文字的函数，将一整句文字显示在屏幕上。  
 你也许发现了，l函数是不会对文字进行换行的，当然你可以在字符串内加入`\n`实现，但这并不在讨论范围内。  
 
-- r 换行  
-r会将文字进行换行，接下来的文字将会从下一行开头开始显示。  
+- [r 换行](../api/#r)  
+`r`会将文字进行换行，接下来的文字将会从下一行开头开始显示。  
 
-- p 清空显示的文字  
-p将会消除当前屏幕上所有文字。  
+- [p 清空文字](../api/#p)  
+`p`将会消除当前屏幕上所有文字。  
 
-- CloseDialog 关闭消息层  
-CloseDialog的作用是关闭消息层，可以带一个参数淡出时长，默认为0.5秒。  
+- [CloseDialog 关闭消息层](../api/#closedialog-time)  
+`CloseDialog`的作用是关闭消息层，可以带一个参数淡出时长，默认为0.5秒。  
 
 ::: warning 注意  
 所有的文字，只有在消息层打开的时候才可以看见，否则是看不见的。
@@ -80,7 +80,7 @@ CloseDialog的作用是关闭消息层，可以带一个参数淡出时长，默
 
 ::: details 详细原理  
 暂停Unity，查看检视器，你会看到所有的文字都显示在了消息层的Text组件上。  
-其中，OpenDialog和CloseDialog将会控制MessagePanel父物体的显示与否。  
+其中，`OpenDialog`和`CloseDialog`将会控制MessagePanel父物体的显示与否。  
 因此，必须确认消息层处于打开的情况下，才能执行显示文字。  
 :::
 
@@ -104,12 +104,12 @@ f.CloseDialog()
 可以看到，文字和人物的姓名顺利的显示在了屏幕上。  
 这里你又会看到新的指令的用法。
 
-- SetDialogWindow 设置对话框的样式  
-SetDialogWindow是一个多重载的函数，详情请参考API相关页面。  
+- [SetDialogWindow 设置对话框的样式](../api/#setdialogwindow)  
+`SetDialogWindow`是一个多重载的函数，详情请参考API相关页面。  
 这里创建了一个大小为 1920*280，白色为背景色，位于(0,1000)的对话框。  
 
-- t 显示文字和姓名  
-t模式与l模式不同，t方法显示的文字将会带有姓名框  
+- [t 显示文字和姓名](../api/#t-dialog-name-voice-avatar-model)  
+`t`模式与`l`模式不同，t方法显示的文字将会带有姓名框  
 而且会在鼠标点击后，自动清空，不再需要`p`指令
 
 ::: details 详细原理  
@@ -141,11 +141,10 @@ f.RemoveBackground()
 
 可以看到在顺利显示背景图片2秒后，又显示了可爱的立绘，再过2秒立绘间消失，最后背景图片消失。  
 
-- SetBackground 设置背景图片  
-SetBackground指令可以将图片文件显示在舞台上。  
+- [SetBackground 设置背景图片](../api/#setbackground-spritename-x-y-alpha)  
+`SetBackground`指令可以将图片文件显示在舞台上。  
 该指令的参数只需带有**文件名**而不需要**后缀名**，默认会寻找*Resources/Background*文件夹下的图片文件。  
-另外，这里隐藏了另外2个参数，x和y，默认值为(0,0)。  
-其含义为图片的坐标，由于是背景图片，这里使用了默认值。  
+另外，这里隐藏了另外2个参数，x和y，默认值为(0,0)。其含义为图片的坐标，由于是背景图片，这里使用了默认值。  
 
 ::: danger 限制  
 由于Unity限制，请勿使用相同的文件名，即使文件的后缀名不同。
@@ -157,37 +156,36 @@ y轴为垂直轴，0则代表距离**屏幕上端**为0。
 计算坐标时，图片的锚点均为左上角。  
 :::
 
-- SetSprite 设置精灵  
-SetSprite指令同样可以将图片文件显示在舞台上。  
-与SetBackground不同的是，SetSprite需要指定一个整数作为层级。  
+- [SetSprite 设置精灵](../api/#setsprite-depth-spritename-x-y-alpha)  
+`SetSprite`指令同样可以将图片文件显示在舞台上。  
+与`SetBackground`不同的是，`SetSprite`需要先指定一个**唯一**的整数作为**层级数**。  
 同时，这里的文件名**需要带有路径**，默认寻找*Resources*文件夹下的图片。  
 
 ::: tip 层级数  
-层级意味着距离屏幕的远近，**数字越大，则靠近屏幕**。  
+层级意味着距离屏幕的远近，**数字越大，越靠近屏幕**。  
+你可能突然疑惑，如果设置层级数为负数，会发生什么？  
+在这里，我们约定**背景图片的层级数为负数，默认的单一背景的层级数为-1**。  
+因此，`SetBackground`等同于`SetSprite(-1)`。  
 :::
 
-你可能突然疑惑，如果设置层级数为负数，会发生什么？  
-**在这里，我们约定背景图片的层级数为负数，背景图片的层级数最大为-1。**  
-因此，SetBackground等同于SetSprite(-1)。  
-
 ::: warning 注意  
-对于层级数为**负数**的SetSprite指令，与SetBackground相同，默认寻找*Resources/Background*文件夹下的图片文件。
+对于层级数为**负数**的`SetSprite`指令，与`SetBackground`相同，默认寻找*Resources/Background*文件夹下的图片文件。
 ::: 
 
-- Wait 等待  
-Wait指令可以让脚本执行暂停一段时间，之后再继续后面的指令。  
+- [Wait 等待](../api/#wait-time)  
+`Wait`指令可以让脚本执行暂停一段时间，之后再继续后面的指令。  
 **另外，在等待期间，任何交互均是锁定的。**
 
-- RemoveSprite 删除指定精灵  
-与SetSprite指令相反，RemoveSprite可以让精灵图片消失。  
+- [RemoveSprite 删除指定精灵](../api/#removesprite-depth-delete)  
+与`SetSprite`指令相反，`RemoveSprite`可以让精灵图片消失。  
 这里需要指定Set时候指定的层级数，如果带入了一个错误的层级数，那么这个操作将会跳过，并在控制台显示报错信息。
 
-- RemoveBackground 删除背景  
-同样与SetBackground指令相反，RemoveBackground可以让背景图片消失。
-背景图片的层级数为负数，因此你也可以使用RemoveSprite(-1)来删除背景。  
+- [RemoveBackground 删除背景](../api/#removebackground-delete)  
+同样与`SetBackground`指令相反，`RemoveBackground`可以让背景图片消失。  
+背景图片的层级数为负数，因此你也可以使用`RemoveSprite(-1)`来删除背景。  
 
 在这里，所有的图片都是**瞬间**消失的，这是正常的。~~并不是什么Bug~~  
-因为Set和Remove都是即时的操作。  
+因为`Set`和`Remove`都是即时的操作。  
 如果想要让图片不是那么快的显示/消失，只需要再加入几行命令。  
 
 ### 渐变
@@ -209,10 +207,10 @@ f.TransAll()
 
 你可看到，与之前不同的是，这次的图片是以渐变的形式显示在屏幕上的。  
 
-- PretransAll  
+- [PretransAll](../api/#pretransall)  
 将当前所有的图片进行预渐变。 
 
-- TransAll  
+- [TransAll](../api/#transall)  
 渐变到新的图片。 
 
 ### 动作
