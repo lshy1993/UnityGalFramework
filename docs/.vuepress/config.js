@@ -6,7 +6,7 @@ module.exports = {
             href: `/favicon.ico`
         }]
     ],
-    dest: '/',
+    //dest: '/',
     ga: '',
     evergreen: true,
     themeConfig: {
