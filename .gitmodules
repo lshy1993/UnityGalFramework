@@ -1,0 +1,3 @@
+[submodule "Assets/AVGParser"]
+	path = Assets/AVGParser
+	url = https://github.com/gjy1992/AVGParser.git
